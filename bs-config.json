@@ -1,0 +1,9 @@
+{
+    "files": "./src/**/*.{js, html, css}",
+    "server": {
+      "baseDir": [
+        "./src",
+        "./build/contracts"
+      ]
+    }
+  }
