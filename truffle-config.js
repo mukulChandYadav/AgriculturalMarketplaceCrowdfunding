@@ -47,6 +47,11 @@ module.exports = {
     //  port: 8545,            // Standard Ethereum port (default: none)
     //  network_id: "*",       // Any network (default: none)
     // },
+    development: {
+      host: "host.docker.internal", // Works in windows, need to find MacOS alternative to connect to host ganache instance //"127.0.0.1" 
+      port: 8545,            // Standard Ethereum port (default: none)
+      network_id: "*",       // Any network (default: none)
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
