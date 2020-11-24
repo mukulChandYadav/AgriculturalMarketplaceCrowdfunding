@@ -1,23 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Agricultural Marketplace & Crowdfunding</title>
-   <!--<link href="./app.css" rel='stylesheet' type='text/css'>
-  <script src="./app.js"></script>-->
+	<meta charset="UTF-8">
+	<title>Crowdfunded Agricultural Marketplace</title>
 </head>
+
 <body>
-<div id="login" class="form">
-	
-		
-			<h2 class="form-title">Login Page</h2>
-				<input type="text" class="input-std" placeholder="Username"  id="username" />
-				<input type="password" class="input-std" placeholder="Password" id="password" />
-				<button type="button" class="btn-submit" id="loginButton" onclick="loginuser()">Login</button>
-				<a  href="">Forgot password?</a>
-				<!--<a id="registerButton" href="register.html">Register</a>-->
-			
-	</div><!-- container -->
-	<!--<link href="./app.css" rel='stylesheet' type='text/css'>
-  <script src="./app.js"></script>-->
+	<div>
+		<h2 class="form-title">Crowdfunded Agricultural Marketplace</h2>
+	</div>
+	<div id="signUpForm" class="form">
+		<h2 class="form-title">Portal Sign Up</h2>
+		<label for="account">Account Address: </label>
+		<input type="text" id="account" name="account" readonly><br><br>
+		<button type="button" class="btn-sign-up" id="signupButton">Sign Up</button>
+	</div>
+
+
+	<link href="css/style.css" rel='stylesheet' type='text/css'>
+	<script src="js/app.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- <script src="js/web3.min.js"></script> -->
+    <script src="js/truffle-contract.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 </body>
+
 </html>

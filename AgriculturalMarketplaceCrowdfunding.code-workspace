@@ -2,6 +2,12 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../Ethereum-Crowdfunding"
+		},
+		{
+			"path": "../blockchain-supply-chain-concept"
 		}
 	]
 }
