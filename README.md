@@ -3,5 +3,5 @@ https://docs.google.com/document/d/1dhBVTf_HUM8bvCbUOoRjRyDwbjR40_4zLWgSH2F-96g/
 
 
 ### Derived from reference codebase/implementation projects 
-https://github.com/axelgalicia/blockchain-supply-chain
-https://github.com/mbarbarelli/Ethereum-Crowdfunding.git
+- https://github.com/axelgalicia/blockchain-supply-chain
+- https://github.com/mbarbarelli/Ethereum-Crowdfunding.git
