@@ -2,7 +2,7 @@
 pragma solidity >=0.4.22 <0.8.0;
 
 import "../tokens/Token.sol";
-import "../utils/Math.sol";
+import "../../utils/Math.sol";
 
 contract FundingToken is Token {
     using Math for *;
@@ -43,7 +43,7 @@ contract FundingToken is Token {
             return false;
         balances[msg.sender] -= value;
         balances[to] += value;
-        Transfer(msg.sender, to, value);
+        emit Transfer(msg.sender, to, value);
         return true;
     }
 
@@ -58,7 +58,7 @@ contract FundingToken is Token {
         balances[from] -= value;
         allowances[from][msg.sender] -= value;
         balances[to] += value;
-        Transfer(from, to, value);
+        emit Transfer(from, to, value);
         return true;
     }
 
@@ -67,7 +67,7 @@ contract FundingToken is Token {
         returns (bool)
     {
         allowances[msg.sender][spender] = value;
-        Approval(msg.sender, spender, value);
+        emit Approval(msg.sender, spender, value);
         return true;
     }
 

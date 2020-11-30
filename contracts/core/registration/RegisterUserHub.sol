@@ -1,11 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
+import './ACLs/FarmerRole.sol';
+import './ACLs/DonorRole.sol';
+import './ACLs/ConsumerRole.sol';
+import './ACLs/ForwardMarketConsumerRole.sol';
+import './ACLs/SpotMarketConsumerRole.sol';
+import './ACLs/InvestorRole.sol';
 
-
-abstract contract  RegisterUserHub{
-
-    
+// TODO: Implement better design pattern to encapsulate all user roles
+abstract contract RegisterUserHub is
+    FarmerRole,
+    DonorRole,
+    ConsumerRole,
+    ForwardMarketConsumerRole,
+    SpotMarketConsumerRole,
+    InvestorRole
+{
     // Signed up users
     mapping(address => bool) signedUpUsers;
 
@@ -27,10 +38,6 @@ abstract contract  RegisterUserHub{
     //Add account to common registry
     function registerUser(uint256 userRoleType) public virtual;
 
-
     //Check if account has registered
-    function isRegistered() public view virtual returns (bool) ;
-
-
-
+    function isRegistered() public virtual view returns (bool);
 }

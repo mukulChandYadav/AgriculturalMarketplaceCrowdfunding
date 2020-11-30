@@ -3,11 +3,6 @@ pragma solidity >=0.4.22 <0.8.0;
 
 import './RegisterUserHub.sol';
 
-import '../../ACLs/FarmerRole.sol';
-import '../../ACLs/DonorRole.sol';
-import '../../ACLs/ForwardMarketConsumerRole.sol';
-import '../../ACLs/SpotMarketConsumerRole.sol';
-import '../../ACLs/InvestorRole.sol';
 contract StandardRegisterUserHub is RegisterUserHub{
 
 
@@ -20,8 +15,6 @@ contract StandardRegisterUserHub is RegisterUserHub{
         require(signedUpUsers[msg.sender] == false);
         _;
     }
-
-    
 
     //Sign up user accounts
     function signUpUser() override public notSignedUp {
