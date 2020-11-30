@@ -8,5 +8,5 @@ The config file for lite-server is: bs-config.json
 /migrations
 /test
 truffle-config.js
-##Ganache details
+## Ganache details
 ganache-cli -m "drama repeat eagle about favorite garbage battle balance slight catalog surround visual" --allowUnlimitedContractSize  --gasLimit 0xFFFFFFFFFFFF
