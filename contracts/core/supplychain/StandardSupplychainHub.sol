@@ -1,20 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
-
-import '../products/StandardProduct.sol';
-import '../crowdFunding/CrowdFundedProduct.sol'; 
+import "../crowdFunding/CrowdFundedProduct.sol";
 //StandardFundingHub.sol';
-import '../registration/StandardRegisterUserHub.sol';
+import "../registration/StandardRegisterUserHub.sol";
 
 // Define a contract 'StandardSupplychainHub'
-contract StandardSupplychainHub  is
+contract StandardSupplychainHub is
     StandardRegisterUserHub,
-    CrowdFundedProduct//StandardFundingHub
+    CrowdFundedProduct //StandardFundingHub
 {
-
-
-constructor(
+    constructor(
         uint256 _upc,
         //uint256 _sku,
         address payable _ownerID,
@@ -26,24 +22,23 @@ constructor(
         string memory _productNotes,
         uint256 _fundingCap,
         uint256 _deadline
-    ) public
-    //StandardFundingHub( _upc,
-    CrowdFundedProduct( _upc,
-        //uint256 _sku,
-        _ownerID,
-        _originFarmerID,
-         _originFarmName,
-         _originFarmInformation,
-         _originFarmLatitude,
-         _originFarmLongitude,
-         _productNotes,
-         _fundingCap,
-         _deadline)
-    {
-    
-}
-
-
+    )
+        public
+        //StandardFundingHub( _upc,
+        CrowdFundedProduct(
+            _upc,
+            //uint256 _sku,
+            _ownerID,
+            _originFarmerID,
+            _originFarmName,
+            _originFarmInformation,
+            _originFarmLatitude,
+            _originFarmLongitude,
+            _productNotes,
+            _fundingCap,
+            _deadline
+        )
+    {}
 
     // Define a modifer that verifies the Caller
     modifier verifyCaller(address _address) {
@@ -86,7 +81,8 @@ constructor(
     modifier harvested(uint256 _upc) {
         StandardProduct product = StandardProduct(products[_upc]);
         require(
-            product.itemProductSupplyChainState() == ProductSupplyChainState.Harvested,
+            product.itemProductSupplyChainState() ==
+                ProductSupplyChainState.Harvested,
             "The Product is not in Harvested state!"
         );
         _;
@@ -96,7 +92,8 @@ constructor(
     modifier processed(uint256 _upc) {
         StandardProduct product = StandardProduct(products[_upc]);
         require(
-            product.itemProductSupplyChainState() == ProductSupplyChainState.Processed,
+            product.itemProductSupplyChainState() ==
+                ProductSupplyChainState.Processed,
             "The Product is not in Processed state!"
         );
         _;
@@ -106,7 +103,8 @@ constructor(
     modifier packed(uint256 _upc) {
         StandardProduct product = StandardProduct(products[_upc]);
         require(
-            product.itemProductSupplyChainState() == ProductSupplyChainState.Packed,
+            product.itemProductSupplyChainState() ==
+                ProductSupplyChainState.Packed,
             "The Product is not in Packed state!"
         );
         _;
@@ -116,7 +114,8 @@ constructor(
     modifier forSale(uint256 _upc) {
         StandardProduct product = StandardProduct(products[_upc]);
         require(
-            product.itemProductSupplyChainState() == ProductSupplyChainState.ForSale,
+            product.itemProductSupplyChainState() ==
+                ProductSupplyChainState.ForSale,
             "The Product is not in ForSale state!"
         );
         _;
@@ -126,7 +125,8 @@ constructor(
     modifier sold(uint256 _upc) {
         StandardProduct product = StandardProduct(products[_upc]);
         require(
-            product.itemProductSupplyChainState() == ProductSupplyChainState.Sold,
+            product.itemProductSupplyChainState() ==
+                ProductSupplyChainState.Sold,
             "The Product is not in Sold state!"
         );
         _;
@@ -136,7 +136,8 @@ constructor(
     modifier shipped(uint256 _upc) {
         StandardProduct product = StandardProduct(products[_upc]);
         require(
-            product.itemProductSupplyChainState() == ProductSupplyChainState.Shipped,
+            product.itemProductSupplyChainState() ==
+                ProductSupplyChainState.Shipped,
             "The Product is not in Shipped state!"
         );
         _;
@@ -146,7 +147,8 @@ constructor(
     modifier received(uint256 _upc) {
         StandardProduct product = StandardProduct(products[_upc]);
         require(
-            product.itemProductSupplyChainState() == ProductSupplyChainState.Received,
+            product.itemProductSupplyChainState() ==
+                ProductSupplyChainState.Received,
             "The Product is not in Received state!"
         );
         _;
@@ -156,7 +158,8 @@ constructor(
     modifier purchased(uint256 _upc) {
         StandardProduct product = StandardProduct(products[_upc]);
         require(
-            product.itemProductSupplyChainState() == ProductSupplyChainState.Purchased,
+            product.itemProductSupplyChainState() ==
+                ProductSupplyChainState.Purchased,
             "The Product is not in Purchased state!"
         );
         _;
@@ -170,7 +173,6 @@ constructor(
         _;
     }
 
-
     // Define a function 'publishCrowdfundingProposal' that allows a farmer to mark an item ready for crowdfunding
     function publishCrowdfundingProposal(
         uint256 _upc,
@@ -180,25 +182,26 @@ constructor(
         string memory _originFarmLatitude,
         string memory _originFarmLongitude,
         string memory _productNotes,
-        uint256  _fundingCap,
-        uint256  _deadline
-
+        uint256 _fundingCap,
+        uint256 _deadline
     )
         public
         //Only Farmer
         onlyFarmer
     {
         // Add the new product for crowdfunding
-        CrowdFundedProduct newProduct = new CrowdFundedProduct(_upc,
-        _originFarmerID,
-        _originFarmerID,
-        _originFarmName,
-        _originFarmInformation,
-        _originFarmLatitude,
-        _originFarmLongitude,
-        _productNotes,
-        _fundingCap,
-        _deadline);
+        CrowdFundedProduct newProduct = new CrowdFundedProduct(
+            _upc,
+            _originFarmerID,
+            _originFarmerID,
+            _originFarmName,
+            _originFarmInformation,
+            _originFarmLatitude,
+            _originFarmLongitude,
+            _productNotes,
+            _fundingCap,
+            _deadline
+        );
 
         products[_upc] = address(newProduct);
         productHistory[_upc].push("Proposal Published");
@@ -375,8 +378,7 @@ constructor(
         emit Purchased(_upc);
     }
 
-
-/*
+    /*
   // Define a function 'fetchProductBufferOne' that fetches the data
   function fetchProductBufferOne(uint _upc) public view returns
   (

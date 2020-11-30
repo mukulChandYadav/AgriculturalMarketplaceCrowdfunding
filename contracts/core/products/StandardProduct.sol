@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
-import "../../utils/Math.sol";
-import "../tokens/FundingToken.sol";
 import "../supplychain/SupplychainProduct.sol";
 
 //import '../crowdFunding/CrowdFundedProduct.sol';

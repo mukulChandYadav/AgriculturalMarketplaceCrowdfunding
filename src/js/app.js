@@ -31,7 +31,7 @@ App = {
     },
 
     subscribeToEvents: function () {
-        
+
         // web3.eth.subscribe('logs', options, function (error, result) {
         //     if (!error)
         //         console.log(result);
@@ -147,6 +147,7 @@ App = {
                     console.log(isUserRegistered);
                     if (isUserRegistered) {
                         $('.userRegistered').show();
+                        $('#account').text(App.getMetaskAccountID());
                     } else {
                         $('.userNotRegistered').show();
                     }
