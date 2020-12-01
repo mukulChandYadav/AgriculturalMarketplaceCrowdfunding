@@ -8,6 +8,7 @@ let StandardSupplychainHub = artifacts.require('StandardSupplychainHub.sol');
 module.exports = function (deployer, network, accounts) {
   deployer.deploy(Math);
   deployer.deploy(Tools);
+
   deployer.link(Math, StandardSupplychainHub);
   deployer.link(Tools, StandardSupplychainHub);
   //uint256 _upc,
