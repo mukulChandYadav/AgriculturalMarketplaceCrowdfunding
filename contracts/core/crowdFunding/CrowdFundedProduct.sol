@@ -3,8 +3,8 @@ pragma solidity >=0.4.22 <0.8.0;
 
 import "../tokens/FundingToken.sol";
 import "../products/StandardProduct.sol";
+import "./CommonUtility.sol";
 
-//interface CrowdFundedProduct {
 contract CrowdFundedProduct is StandardProduct {
     enum ProductFundingStatus {Active, Inactive, Expired, Closed}
 
@@ -18,7 +18,7 @@ contract CrowdFundedProduct is StandardProduct {
         Failed
     }
 
-    enum FundingStatus {Active, Inactive, Closed}
+    //enum FundingStatus {Active, Inactive, Closed}
 
     //address public creator;
     //uint256 public createdAtBlock;
@@ -26,7 +26,7 @@ contract CrowdFundedProduct is StandardProduct {
     uint256 public deadline;
     uint256 public fundingCap;
     address public beneficiary;
-    ProductFundingStatus public status;
+    ProductFundingStatus public status; //TODO: Remove
     FundingStage public stage;
     FundingToken public fundingToken;
 
@@ -51,15 +51,6 @@ contract CrowdFundedProduct is StandardProduct {
     // Define 10 events with the same 10 state values and accept 'upc' as input argument
     event ProposalPublished(uint256 upc);
     event RequiredFundingAchieved(uint256 upc);
-
-    // function createProduct(uint256 _fundingCap, uint256 _deadline)
-    //     public
-    //     virtual
-    //     returns (StandardProduct);
-
-    // function contribute(StandardProduct _product, uint256 _contribution)
-    //     public
-    //     virtual;
 
     constructor(
         uint256 _upc,
@@ -102,6 +93,14 @@ contract CrowdFundedProduct is StandardProduct {
 
     function fundingStage() public view returns (FundingStage) {
         return stage;
+    }
+
+    modifier atFundingStage(FundingStage requiredFundingStage) {
+        require(
+            stage == requiredFundingStage,
+            "Product not at required funding stage"
+        );
+        _;
     }
 
     modifier evalExpiry {
@@ -206,4 +205,43 @@ contract CrowdFundedProduct is StandardProduct {
         );
         emit LogPayout(beneficiary, payOut);
     }
+
+    function toggleActive() public onlyOwner {
+        status = (status == ProductFundingStatus.Active)
+            ? ProductFundingStatus.Inactive
+            : ProductFundingStatus.Active;
+    }
+
+    // Define a function 'harvestProduct' that allows a farmer to mark an item 'Harvested'
+    function harvestProduct()
+        public
+        override
+        atFundingStage(FundingStage.PaidOut)
+        returns (bool)
+    {
+        require(super.harvestProduct());
+        return true;
+    }
+
+    // Define a function 'sellProduct' that allows a farmer to mark an item 'ForSale'
+    function sellProduct(uint256 _price)
+        public
+        atFundingStage(FundingStage.PaidOut)
+    {
+        // Update the appropriate fields
+        // StandardProduct existingProduct = StandardProduct(products[_upc]);
+        // existingProduct.updateProductStatus(ProductSupplyChainState.ForSale);
+        //existingProduct.productPrice = _price;
+        // Emit the appropriate event
+        // emit ForSale(_upc);
+    }
+
+    // function createProduct(uint256 _fundingCap, uint256 _deadline)
+    //     public
+    //     virtual
+    //     returns (StandardProduct);
+
+    // function contribute(StandardProduct _product, uint256 _contribution)
+    //     public
+    //     virtual;
 }

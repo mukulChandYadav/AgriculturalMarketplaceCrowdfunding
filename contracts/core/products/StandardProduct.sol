@@ -23,9 +23,6 @@ contract StandardProduct is SupplychainProduct {
     // Define a public mapping 'products' that maps the UPC to an Item.
     mapping(uint256 => address) products;
 
-    // Define a public mapping 'productsHistory' that maps the UPC to an array of TxHash,
-    // that track its journey through the supply chain -- to be sent from DApp.
-    mapping(uint256 => string[]) productHistory;
 
     constructor(
         uint256 _upc,
@@ -47,8 +44,17 @@ contract StandardProduct is SupplychainProduct {
         productNotes = _productNotes;
     }
 
-    event LogStandardProductCreation(
+    event LogStandardProductCreation (
         address indexed productCreator,
         StandardProduct indexed standardProduct
-    );
+    )  ;
+
+
+
+    // Define a function 'harvestProduct' that allows a farmer to mark an item 'Harvested'
+    function harvestProduct() public override virtual returns (bool)
+    {
+        require(super.harvestProduct());
+        return true;
+    }
 }

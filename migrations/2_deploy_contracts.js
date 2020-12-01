@@ -1,4 +1,5 @@
 let Math = artifacts.require('Math.sol');
+let Tools = artifacts.require('Tools.sol');
 let StandardSupplychainHub = artifacts.require('StandardSupplychainHub.sol');
 
 // var fundingCap = web3.toWei(2, "ether"); 
@@ -6,7 +7,9 @@ let StandardSupplychainHub = artifacts.require('StandardSupplychainHub.sol');
 
 module.exports = function (deployer, network, accounts) {
   deployer.deploy(Math);
+  deployer.deploy(Tools);
   deployer.link(Math, StandardSupplychainHub);
+  deployer.link(Tools, StandardSupplychainHub);
   //uint256 _upc,
   //     //uint256 _sku,
   //     address payable _ownerID,

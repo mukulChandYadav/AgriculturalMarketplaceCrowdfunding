@@ -33,11 +33,14 @@ abstract contract RegisterUserHub is
     }
 
     //Sign up user accounts
-    function signUpUser() public virtual;
+    function signUpUser() public virtual returns(bool);
 
     //Add account to common registry
-    function registerUser(uint256 userRoleType) public virtual;
+    function registerUser(uint256 userRoleType) public virtual returns(bool);
 
     //Check if account has registered
     function isRegistered() public virtual view returns (bool);
+
+    //Check if account has signedUp
+    function isSignedUp()  public virtual view returns (bool);
 }

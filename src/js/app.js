@@ -114,12 +114,14 @@ App = {
             console.log('getMetaskID:', res);
             App.metamaskAccountID = res[0];
 
-        })
+        });
+
+        return App.metamaskAccountID;
     },
 
     initSupplyChain: async function () {
         /// Source the truffle compiled smart contracts
-        var jsonSupplyChain = '../../build/contracts/SupplyChain.json';
+        var jsonSupplyChain = 'StandardSupplychainHub.json';
 
         /// JSONfy the smart contracts
         await $.getJSON(jsonSupplyChain, function (data) {
@@ -128,8 +130,6 @@ App = {
             App.contracts.SupplyChain = TruffleContract(SupplyChainArtifact);
             App.contracts.SupplyChain.setProvider(App.web3Provider);
 
-            App.fetchItemBufferOne();
-            App.fetchItemBufferTwo();
             App.fetchEvents();
 
         });
@@ -142,16 +142,33 @@ App = {
             .deployed()
             .then(
                 function (inst) {
-                    return inst.isRegistered();
-                }).then(function (isUserRegistered) {
-                    console.log(isUserRegistered);
-                    if (isUserRegistered) {
-                        $('.userRegistered').show();
-                        $('#account').text(App.getMetaskAccountID());
+                    return inst.isSignedUp();
+                }).then(function (isUserSignedUp) {
+                    console.log("Is User signed up:" + isUserSignedUp);
+                    if (isUserSignedUp) {
+                        App.contracts.SupplyChain
+                            .deployed()
+                            .then(
+                                function (inst) {
+                                    return inst.isRegistered();
+                                })
+                            .then(function (isUserRegistered) {
+                                console.log("Is user registered:" + isUserRegistered);
+                                if (isUserRegistered) {
+                                    $('.userRegistered').show();
+                                } else {
+                                    $('.userNotRegistered').show();
+                                }
+                            });
                     } else {
-                        $('.userNotRegistered').show();
+                        $('#account').val(App.getMetaskAccountID());
+                        $('.userNotSignedUp').show();
                     }
                 });
+
+
+
+
     },
 
     bindEvents: function () {
@@ -180,7 +197,6 @@ App = {
                 break;
             case 4:
                 return await App.sellItem(event);
-                break;
             case 5:
                 return await App.buyItem(event);
                 break;
@@ -202,6 +218,8 @@ App = {
             case 11:
                 return await App.registerUser(event);
                 break;
+            case 12:
+                return await App.signUpUser(event);
         }
     },
 
@@ -336,35 +354,35 @@ App = {
     },
 
 
-    fetchItemBufferOne: function () {
-        ///   event.preventDefault();
-        ///    var processId = parseInt($(event.target).data('id'));
-        App.upc = $('#upc').val();
-        console.log('upc', App.upc);
+    // fetchItemBufferOne: function () {
+    //     ///   event.preventDefault();
+    //     ///    var processId = parseInt($(event.target).data('id'));
+    //     App.upc = $('#upc').val();
+    //     console.log('upc', App.upc);
 
-        App.contracts.SupplyChain.deployed().then(function (instance) {
-            return instance.fetchItemBufferOne(App.upc);
-        }).then(function (result) {
-            $("#ftc-item").text(result);
-            console.log('fetchItemBufferOne', result);
-        }).catch(function (err) {
-            console.log(err.message);
-        });
-    },
+    //     App.contracts.SupplyChain.deployed().then(function (instance) {
+    //         return instance.fetchItemBufferOne(App.upc);
+    //     }).then(function (result) {
+    //         $("#ftc-item").text(result);
+    //         console.log('fetchItemBufferOne', result);
+    //     }).catch(function (err) {
+    //         console.log(err.message);
+    //     });
+    // },
 
-    fetchItemBufferTwo: function () {
-        ///    event.preventDefault();
-        ///    var processId = parseInt($(event.target).data('id'));
+    // fetchItemBufferTwo: function () {
+    //     ///    event.preventDefault();
+    //     ///    var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.deployed().then(function (instance) {
-            return instance.fetchItemBufferTwo.call(App.upc);
-        }).then(function (result) {
-            $("#ftc-item").text(result);
-            console.log('fetchItemBufferTwo', result);
-        }).catch(function (err) {
-            console.log(err.message);
-        });
-    },
+    //     App.contracts.SupplyChain.deployed().then(function (instance) {
+    //         return instance.fetchItemBufferTwo.call(App.upc);
+    //     }).then(function (result) {
+    //         $("#ftc-item").text(result);
+    //         console.log('fetchItemBufferTwo', result);
+    //     }).catch(function (err) {
+    //         console.log(err.message);
+    //     });
+    // },
 
     fetchEvents: function () {
         if (typeof App.contracts.SupplyChain.currentProvider.sendAsync !== "function") {
@@ -387,6 +405,32 @@ App = {
 
     },
 
+    signUpUser: function (event) {
+        event.preventDefault();
+
+        console.log('Sign Up User');
+
+        App.contracts.SupplyChain.deployed().then(function (instance) {
+
+            instance
+                .isSignedUp({ from: App.metamaskAccountID })
+                .then(function (isSignedUp) {
+                    if (!isSignedUp) {
+                        instance.signUpUser({ from: App.metamaskAccountID })
+                            .then(function (result) {
+                                console.log("Sign up Request result:" + result);
+                                //TODO: Find better way of handling it
+                                location.reload();
+                            });
+                    } else {
+                        console.log("User already signed up");
+                    }
+                });
+        }).catch(function (err) {
+            console.log(err.message);
+        });
+    },
+
     registerUser: function (event) {
         event.preventDefault();
         var userType = $('input[name="UserRole"]:checked').val();
@@ -401,84 +445,49 @@ App = {
                     if (!isRegistered) {
                         switch (userType) {
                             case 'Farmer': // Farmer
-                                instance
-                                    .isFarmer(App.metamaskAccountID)
-                                    .then(function (isFarmer) {
-                                        console.log(isFarmer);
-                                        if (!isFarmer) {
-                                            instance.addFarmer(App.metamaskAccountID)
-                                                .catch(function (err) {
-                                                    console.log(err.message);
-                                                });
-                                            instance.registerUser(1)
-                                                .catch(function (err) {
-                                                    console.log(err.message);
-                                                });
-                                        } else {
-                                            console.log("Farmer role already assigned to user account-" + App.metamaskAccountID);
-                                        }
+                                instance.registerUser(1)
+                                    .then(function (result) {
+                                        location.reload(); //TODO: Refactor
+                                    })
+                                    .catch(function (err) {
+                                        console.log(err.message);
                                     });
                                 break;
-                            case 'Distributor': // Distributor
-                                instance
-                                    .isDistributor(App.metamaskAccountID)
-                                    .then(function (isDistributor) {
-                                        console.log(isDistributor);
-                                        if (!isDistributor) {
-                                            instance.addDistributor(App.metamaskAccountID)
-                                                .catch(function (err) {
-                                                    console.log(err.message);
-                                                });
-                                            instance.registerUser(2)
-                                                .catch(function (err) {
-                                                    console.log(err.message);
-                                                });
-                                        } else {
-                                            console.log("Distributor role already assigned to user account-" + App.metamaskAccountID);
-                                        }
+                            case 'Donor': // Donor
+                                instance.registerUser(2)
+                                    .then(function (result) {
+                                        location.reload(); //TODO: Refactor
+                                    })
+                                    .catch(function (err) {
+                                        console.log(err.message);
                                     });
                                 break;
-                            case 'Retailer': //Retailer
-
-                                instance
-                                    .isRetailer(App.metamaskAccountID)
-                                    .then(function (isRetailer) {
-                                        console.log(isRetailer);
-                                        if (!isRetailer) {
-                                            instance.addRetailer(App.metamaskAccountID)
-                                                .catch(function (err) {
-                                                    console.log(err.message);
-                                                });
-                                            instance.registerUser(3)
-                                                .catch(function (err) {
-                                                    console.log(err.message);
-                                                });
-                                        } else {
-                                            console.log("Retailer role already assigned to user account-" + App.metamaskAccountID);
-                                        }
-                                    });
-
+                            case 'Investor': //Investor
+                                instance.registerUser(3)
+                                .then(function (result) {
+                                    location.reload(); //TODO: Refactor
+                                })
+                                .catch(function (err) {
+                                    console.log(err.message);
+                                });
                                 break;
-                            case 'Consumer': //Consumer
-
-                                instance
-                                    .isConsumer(App.metamaskAccountID)
-                                    .then(function (isConsumer) {
-                                        console.log(isConsumer);
-                                        if (!isConsumer) {
-                                            instance.addConsumer(App.metamaskAccountID)
-                                                .catch(function (err) {
-                                                    console.log(err.message);
-                                                });
-                                            instance.registerUser(4)
-                                                .catch(function (err) {
-                                                    console.log(err.message);
-                                                });
-                                        } else {
-                                            console.log("Consumer role already assigned to user account-" + App.metamaskAccountID);
-                                        }
-                                    });
-
+                            case 'ForwardMarketConsumer': //ForwardMarketConsumer
+                                instance.registerUser(4)
+                                .then(function (result) {
+                                    location.reload(); //TODO: Refactor
+                                })    
+                                .catch(function (err) {
+                                    console.log(err.message);
+                                });     
+                                break;
+                            case 'SpotMarketConsumer': //SpotMarketConsumer
+                                instance.registerUser(5)
+                                .then(function (result) {
+                                    location.reload(); //TODO: Refactor
+                                })    
+                                .catch(function (err) {
+                                    console.log(err.message);
+                                });     
                                 break;
                         }
                     } else {
