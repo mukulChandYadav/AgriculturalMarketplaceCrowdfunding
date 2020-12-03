@@ -22,6 +22,25 @@ contract SupplychainProduct is Ownable {
         Purchased // 10
     }
 
+
+    // Define a variable called 'upc' for Universal Product Code (UPC)
+    uint256 public upc;
+    // Define a variable called 'sku' for Stock Keeping Unit (SKU)
+    uint256 public sku;
+    ProductSupplyChainState constant defaultProductSupplyChainState = ProductSupplyChainState
+        .ProposalPublished;
+
+    // Product ProductSupplyChainState as represented in the enum above
+    ProductSupplyChainState public itemProductSupplyChainState;
+
+    constructor(uint256 _upc, uint256 _sku) public {
+        upc = _upc;
+        sku=_sku;
+        // Setting state tp Prposed for crowdfunding
+        itemProductSupplyChainState = defaultProductSupplyChainState;
+    }
+
+
     function getProductSupplyChainStateStr(ProductSupplyChainState scs)
         internal
         pure
@@ -38,26 +57,6 @@ contract SupplychainProduct is Ownable {
         if (scs == ProductSupplyChainState.Sold) return "Sold";
         if (scs == ProductSupplyChainState.Purchased) return "Purchased";
         return "UnknownSupplychainStage";
-    }
-
-    // Define a variable called 'upc' for Universal Product Code (UPC)
-    uint256 public upc;
-    // Define a variable called 'sku' for Stock Keeping Unit (SKU)
-    //uint256 public sku;
-    ProductSupplyChainState constant defaultProductSupplyChainState = ProductSupplyChainState
-        .ProposalPublished;
-
-    // Product ProductSupplyChainState as represented in the enum above
-    ProductSupplyChainState public itemProductSupplyChainState;
-
-    constructor(
-        uint256 _upc //,
-    ) public //uint256 _sku,)
-    {
-        upc = _upc;
-        //sku=_sku;
-        // Setting state tp Prposed for crowdfunding
-        itemProductSupplyChainState = defaultProductSupplyChainState;
     }
 
     event Harvested(uint256 upc);

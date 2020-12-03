@@ -1,42 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
+pragma experimental ABIEncoderV2;
 
 import "./CrowdFundedProduct.sol";
 import "./CommonUtility.sol";
 import "../base/Ownable.sol";
 
-contract StandardFundingHub is Ownable{
+contract StandardFundingHub is Ownable {
     mapping(uint256 => address) public products;
-    mapping(bytes32 => bytes32) public productList;
+    mapping(uint256 => uint256) public upcList;
+    uint256 _upc;
 
-    // constructor(
-    //     uint256 _upc,
-    //     //uint256 _sku,
-    //     address payable _ownerID,
-    //     address payable _originFarmerID,
-    //     string memory _originFarmName,
-    //     string memory _originFarmInformation,
-    //     string memory _originFarmLatitude,
-    //     string memory _originFarmLongitude,
-    //     string memory _productNotes,
-    //     uint256 _fundingCap,
-    //     uint256 _deadline
-    // )
-    //     public
-    //     CrowdFundedProduct(
-    //         _upc,
-    //         //uint256 _sku,
-    //         _ownerID,
-    //         _originFarmerID,
-    //         _originFarmName,
-    //         _originFarmInformation,
-    //         _originFarmLatitude,
-    //         _originFarmLongitude,
-    //         _productNotes,
-    //         _fundingCap,
-    //         _deadline
-    //     )
-    // {}
+    constructor() public {
+        _upc = 1;
+    }
 
     // modifier atStatus(ProductFundingStatus _expectedStatus) {
     //     require(CrowdFundedProduct(msg.sender).status() == _expectedStatus);
@@ -44,14 +21,9 @@ contract StandardFundingHub is Ownable{
     // }
 
     function createProduct(
-        uint256 _upc,
-        //uint256 _sku,
+        uint256 _sku,
         address payable _ownerID,
-        address payable _originFarmerID,
         string memory _originFarmName,
-        string memory _originFarmInformation,
-        string memory _originFarmLatitude,
-        string memory _originFarmLongitude,
         string memory _productNotes,
         uint256 _fundingCap,
         uint256 _deadline
@@ -67,22 +39,17 @@ contract StandardFundingHub is Ownable{
         //     abi.encode(msg.sender, _fundingCap, block.timestamp + _deadline)
         // );
 
-        // ensure that project does not already exist.
-        require(address(products[_upc]) == address(0));
         productContract = new CrowdFundedProduct(
             _upc,
-            //_sku,
+            _sku,
             _ownerID,
-            _originFarmerID,
             _originFarmName,
-            _originFarmInformation,
-            _originFarmLatitude,
-            _originFarmLongitude,
             _productNotes,
             _fundingCap,
             _deadline
         );
         addProduct(productContract, _upc);
+        _upc = _upc + 1;
         //emit LogStandardProductCreation(msg.sender, productContract);
     }
 
@@ -96,11 +63,18 @@ contract StandardFundingHub is Ownable{
         //emit LogProductContribution(address(_product), msg.sender, _amount);
     }
 
-    function addProduct(CrowdFundedProduct _productContract, uint256 _upc)
+    function addProduct(CrowdFundedProduct productContract, uint256 upc)
         internal
     {
-        products[_upc] = address(_productContract);
-        //productList[_productHash] = productList[0x0];
-        //productList[0x0] = _productHash;
+        products[upc] = address(productContract);
     }
+
+    function getProductAddresses() public view returns (address[] memory) {
+        address[] memory ret = new address[](_upc);
+        for (uint256 i = 0; i+1 < _upc; i++) {
+            ret[i] = products[i+1];
+        }
+        return ret;
+    }
+
 }

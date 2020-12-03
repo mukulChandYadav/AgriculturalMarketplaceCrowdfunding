@@ -4,8 +4,9 @@ import React, { Component } from 'react';
 
 
 import SignUp from './SignUp';
-import Products from './Products';
+import ProductListing from './ProductListing';
 import Register from './Register';
+import PublishProductForm from './PublishProductForm';
 import {
     BrowserRouter as Router,
     Switch
@@ -23,7 +24,11 @@ const routes = [
     },
     {
         path: "/products",
-        component: Products,
+        component: ProductListing,
+    },{
+        
+        path: "/publishProduct",
+        component: PublishProductForm,
     }
 ];
 

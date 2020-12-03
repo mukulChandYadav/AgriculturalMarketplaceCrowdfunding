@@ -8,17 +8,10 @@ import "../supplychain/SupplychainProduct.sol";
 contract StandardProduct is SupplychainProduct {
     address payable public ownerID; // Metamask-Ethereum address of the current owner as the product moves through 8 stages
     address payable public originFarmerID; // Metamask-Ethereum address of the Farmer
-    string public originFarmName; // Farmer Name
-    string public originFarmInformation; // Farmer Information
-    string public originFarmLatitude; // Farm Latitude
-    string public originFarmLongitude; // Farm Longitude
-    uint256 public productID; // Product ID potentially a combination of upc + sku
-    string productNotes; // Product Notes
+    string public originFarmName; // Farm Name
+    string public productNotes; // Product Notes
     uint256 public productPrice; // Product Price
 
-    address payable public distributorID; // Metamask-Ethereum address of the Distributor
-    address payable public retailerID; // Metamask-Ethereum address of the Retailer
-    address payable public consumerID; // Metamask-Ethereum address of the Consumer
 
     // Define a public mapping 'products' that maps the UPC to an Item.
     mapping(uint256 => address) products;
@@ -26,21 +19,14 @@ contract StandardProduct is SupplychainProduct {
 
     constructor(
         uint256 _upc,
-        //uint256 _sku,
+        uint256 _sku,
         address payable _ownerID,
-        address payable _originFarmerID,
         string memory _originFarmName,
-        string memory _originFarmInformation,
-        string memory _originFarmLatitude,
-        string memory _originFarmLongitude,
         string memory _productNotes
-    ) public SupplychainProduct(_upc) {
+    ) public SupplychainProduct(_upc,_sku) {
         ownerID = _ownerID;
-        originFarmerID = _originFarmerID;
+        originFarmerID = _ownerID;
         originFarmName = _originFarmName;
-        originFarmInformation = _originFarmInformation;
-        originFarmLatitude = _originFarmLatitude;
-        originFarmLongitude = _originFarmLongitude;
         productNotes = _productNotes;
     }
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
+pragma experimental ABIEncoderV2;
 
 import "../crowdFunding/StandardFundingHub.sol";
-//CrowdFundedProduct.sol';
 import "../base/Ownable.sol";
 import "../registration/StandardRegisterUserHub.sol";
 
@@ -31,23 +31,23 @@ contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
     }
 
     // Define a modifier that checks the price and refunds the remaining balance
-    modifier checkValueForDistributor(uint256 _upc) {
-        _;
-        StandardProduct product = StandardProduct(products[_upc]);
-        uint256 _price = product.productPrice();
-        uint256 amountToReturn = msg.value - _price;
-        product.distributorID().transfer(amountToReturn);
-    }
+    // modifier checkValueForDistributor(uint256 _upc) {
+    //     _;
+    //     StandardProduct product = StandardProduct(products[_upc]);
+    //     uint256 _price = product.productPrice();
+    //     uint256 amountToReturn = msg.value - _price;
+    //     product.distributorID().transfer(amountToReturn);
+    // }
 
     // Define a modifier that checks the price and refunds the remaining balance
     // to the Consumer
-    modifier checkValueForConsumer(uint256 _upc) {
-        _;
-        StandardProduct product = StandardProduct(products[_upc]);
-        uint256 _price = product.productPrice();
-        uint256 amountToReturn = msg.value - _price;
-        product.consumerID().transfer(amountToReturn);
-    }
+    // modifier checkValueForConsumer(uint256 _upc) {
+    //     _;
+    //     StandardProduct product = StandardProduct(products[_upc]);
+    //     uint256 _price = product.productPrice();
+    //     uint256 amountToReturn = msg.value - _price;
+    //     product.consumerID().transfer(amountToReturn);
+    // }
 
     modifier onlyConsumer() {
         require(
@@ -59,12 +59,9 @@ contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
 
     // Define a function 'publishCrowdfundingProposal' that allows a farmer to mark an item ready for crowdfunding
     function publishCrowdfundingProposal(
-        uint256 _upc,
+        uint256 sku,
         address payable _originFarmerID,
         string memory _originFarmName,
-        string memory _originFarmInformation,
-        string memory _originFarmLatitude,
-        string memory _originFarmLongitude,
         string memory _productNotes,
         uint256 _fundingCap,
         uint256 _deadline
@@ -75,20 +72,15 @@ contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
     {
         // Add the new product for crowdfunding
         CrowdFundedProduct newProduct = createProduct(
-            _upc,
-            _originFarmerID,
+            sku,
             _originFarmerID,
             _originFarmName,
-            _originFarmInformation,
-            _originFarmLatitude,
-            _originFarmLongitude,
             _productNotes,
             _fundingCap,
             _deadline
         );
-
-        //products[_upc] = address(newProduct);
-        productHistory[_upc].push("Proposal Published");
+        
+        productHistory[SupplychainProduct(newProduct).upc()].push("Proposal Published");
         //emit ProposalPublished(_upc);
     }
 

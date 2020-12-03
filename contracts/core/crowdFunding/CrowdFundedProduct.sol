@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
+pragma experimental ABIEncoderV2;
 
 import "../tokens/FundingToken.sol";
 import "../products/StandardProduct.sol";
@@ -8,15 +9,6 @@ import "./CommonUtility.sol";
 contract CrowdFundedProduct is StandardProduct {
     enum ProductFundingStatus {Active, Inactive, Expired, Closed}
 
-    enum FundingStage {
-        Open,
-        FundingRaised,
-        CapReached,
-        EarlySuccess,
-        Success,
-        PaidOut,
-        Failed
-    }
 
     //enum FundingStatus {Active, Inactive, Closed}
 
@@ -27,7 +19,7 @@ contract CrowdFundedProduct is StandardProduct {
     uint256 public fundingCap;
     address public beneficiary;
     ProductFundingStatus public status; //TODO: Remove
-    FundingStage public stage;
+    FundingStage public fundingStage;
     FundingToken public fundingToken;
 
     event LogProductContribution(
@@ -54,51 +46,55 @@ contract CrowdFundedProduct is StandardProduct {
 
     constructor(
         uint256 _upc,
-        //uint256 _sku,
+        uint256 _sku,
         address payable _ownerID,
-        address payable _originFarmerID,
         string memory _originFarmName,
-        string memory _originFarmInformation,
-        string memory _originFarmLatitude,
-        string memory _originFarmLongitude,
         string memory _productNotes,
         uint256 _fundingCap,
         uint256 _deadline
     )
         public
-        StandardProduct(
-            _upc,
-            //uint256 _sku,
-            _ownerID,
-            _originFarmerID,
-            _originFarmName,
-            _originFarmInformation,
-            _originFarmLatitude,
-            _originFarmLongitude,
-            _productNotes
-        )
+        StandardProduct(_upc, _sku, _ownerID, _originFarmName, _productNotes)
     {
         beneficiary = _ownerID;
         fundingCap = _fundingCap;
         creationTime = block.timestamp;
         deadline = _deadline;
         fundingToken = new FundingToken();
-        stage = FundingStage.Open;
+        fundingStage = FundingStage.Open;
         status = ProductFundingStatus.Active;
     }
+
+    
+    // function getProductState()
+    //     public
+    //     view
+    //     returns (CrowdFundedProductState memory)
+    // {
+    //     CrowdFundedProductState memory productState;
+    //     productState.upc = upc;
+    //     productState.sku = sku;
+    //     productState.ownerID = ownerID;
+    //     productState.originFarmerID = originFarmerID;
+    //     productState.originFarmName = originFarmName;
+    //     productState.productNotes = productNotes;
+    //     productState.fundingCap = fundingCap;
+    //     productState.deadline = deadline;
+    //     productState.productPrice = productPrice;
+    //     productState.fundingStage = fundingStage;
+    //     productState.creationTime = creationTime;
+
+    //     return productState;
+    // }
 
     function projectStatus() public view returns (ProductFundingStatus) {
         return status;
     }
 
-    function fundingStage() public view returns (FundingStage) {
-        return stage;
-    }
-
     modifier atFundingStage(FundingStage requiredFundingStage) {
         require(
-            stage == requiredFundingStage,
-            "Product not at required funding stage"
+            fundingStage == requiredFundingStage,
+            "Product not at required funding fundingStage"
         );
         _;
     }
@@ -116,21 +112,21 @@ contract CrowdFundedProduct is StandardProduct {
     modifier evalFundingStage {
         if (status != ProductFundingStatus.Closed) {
             if (
-                (stage != FundingStage.CapReached ||
-                    stage != FundingStage.EarlySuccess) &&
+                (fundingStage != FundingStage.CapReached ||
+                    fundingStage != FundingStage.EarlySuccess) &&
                 status == ProductFundingStatus.Expired
             ) {
-                stage = FundingStage.Failed;
+                fundingStage = FundingStage.Failed;
             } else if (
-                stage == FundingStage.CapReached &&
+                fundingStage == FundingStage.CapReached &&
                 status == ProductFundingStatus.Active
             ) {
-                stage = FundingStage.EarlySuccess;
+                fundingStage = FundingStage.EarlySuccess;
             } else if (
-                stage == FundingStage.CapReached &&
+                fundingStage == FundingStage.CapReached &&
                 status == ProductFundingStatus.Expired
             ) {
-                stage = FundingStage.Success;
+                fundingStage = FundingStage.Success;
             }
         }
         _;
@@ -146,7 +142,7 @@ contract CrowdFundedProduct is StandardProduct {
         evalFundingStage
     {
         require(
-            stage == FundingStage.Open || stage == FundingStage.FundingRaised
+            fundingStage == FundingStage.Open || fundingStage == FundingStage.FundingRaised
         );
 
         // Reduce contribution amount if it exceeds funding cap, or overflows
@@ -165,10 +161,10 @@ contract CrowdFundedProduct is StandardProduct {
         emit LogProductContributed(investor, _funding);
 
         if (amountRaised() == fundingCap) {
-            stage = FundingStage.CapReached;
+            fundingStage = FundingStage.CapReached;
             emit LogFundingCapReached(block.timestamp, _funding);
         } else {
-            stage = FundingStage.FundingRaised;
+            fundingStage = FundingStage.FundingRaised;
         }
     }
 
@@ -178,7 +174,7 @@ contract CrowdFundedProduct is StandardProduct {
         evalExpiry
         evalFundingStage
     {
-        require(stage == FundingStage.Failed);
+        require(fundingStage == FundingStage.Failed);
         uint256 toRefund = fundingToken.contributionOf(msg.sender);
         require(fundingToken.transfer(msg.sender, toRefund));
         require(updateProductStatus(ProductSupplyChainState.ProductErrorState));
@@ -193,12 +189,12 @@ contract CrowdFundedProduct is StandardProduct {
         evalFundingStage
     {
         require(
-            stage == FundingStage.Success || stage == FundingStage.EarlySuccess
+            fundingStage == FundingStage.Success || fundingStage == FundingStage.EarlySuccess
         );
 
         uint256 payOut = fundingToken.balanceOf(address(this));
         require(fundingToken.transfer(beneficiary, payOut));
-        stage = FundingStage.PaidOut;
+        fundingStage = FundingStage.PaidOut;
         status = ProductFundingStatus.Closed;
         require(
             updateProductStatus(ProductSupplyChainState.RequiredFundingAchieved)

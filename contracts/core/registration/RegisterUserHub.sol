@@ -17,8 +17,6 @@ abstract contract RegisterUserHub is
     SpotMarketConsumerRole,
     InvestorRole
 {
-    // Signed up users
-    mapping(address => bool) signedUpUsers;
 
     //Registered users to role mapping
     mapping(address => UserRoleType) registeredUsers;
@@ -32,8 +30,6 @@ abstract contract RegisterUserHub is
         SportMarketConsumer
     }
 
-    //Sign up user accounts
-    function signUpUser() public virtual returns(bool);
 
     //Add account to common registry
     function registerUser(uint256 userRoleType) public virtual returns(bool);
@@ -41,6 +37,8 @@ abstract contract RegisterUserHub is
     //Check if account has registered
     function isRegistered() public virtual view returns (bool);
 
-    //Check if account has signedUp
-    function isSignedUp()  public virtual view returns (bool);
+    
+    //Check if account has registered
+    function getUserRole() public virtual view returns (UserRoleType);
+
 }
