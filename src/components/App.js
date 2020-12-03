@@ -6,7 +6,8 @@ import Register from './Register';
 import Web3 from 'web3';
 import './App.css';
 import Routes from './Routes.js';
-import ProductListing from './ProductListing';
+import ProductListing from './productListing/ProductListing';
+import { NumToUserRole } from './Constants';
 
 class App extends Component {
 
@@ -74,28 +75,36 @@ class App extends Component {
       contractAddress: null,
       contract: {},
       loading: true,
-      zeroAddr: '0x0000000000000000000000000000000000000000'
+      zeroAddr: '0x0000000000000000000000000000000000000000',
+      userName: '',
+      userRole: ''
     }
     this.getPublishedProductDetails = this.getPublishedProductDetails.bind(this);
     this.registerUser = this.registerUser.bind(this);
     this.publishProduct = this.publishProduct.bind(this);
     this.getProductDetails = this.getProductDetails.bind(this);
+    this.fundProduct = this.fundProduct.bind(this);
   }
 
   async loadSupplychainHub() {
     const web3 = await this.loadWeb3();
     const contract = new web3.eth.Contract(StandardSupplychainHub.abi, this.state.contractAddress);
-    var userRole = 0;
 
     const isUserRegistered = await contract.methods.isRegistered().call({ from: this.state.account });
     if (isUserRegistered) {
-      userRole = await contract.methods.getUserRole().call({ from: this.state.account });
+      const userRole = await contract.methods.getUserRole().call({ from: this.state.account });
+      const userName = await contract.methods.getUserName().call({ from: this.state.account });
+
+      this.setState({
+        'userRole': NumToUserRole[userRole],
+        'userName': userName
+      });
+      console.log("userRole:" + this.state.userRole);
     }
-    console.log("Is User Registered:" + isUserRegistered + " " + this.state.account + ", userRole:" + userRole);
+    console.log("Is User Registered:" + isUserRegistered + " " + this.state.account);
     this.setState({
       contract,
-      isUserRegistered,
-      userRole
+      isUserRegistered
     });
     console.log("App state")
     console.log(this.state);
@@ -121,9 +130,9 @@ class App extends Component {
   }
 
 
-  async registerUser(userRoleType) {
-    this.setState({ loading: true })
-    this.state.contract.methods.registerUser(userRoleType)
+  async registerUser(userName, userRoleType) {
+    this.setState({ loading: true });
+    this.state.contract.methods.registerUser(userName, userRoleType)
       .send({
         from: this.state.account
       }).on('receipt', async (receipt) => {
@@ -133,6 +142,7 @@ class App extends Component {
       }).on('error', function (error, receipt) {
         console.log(error);
         console.log(receipt);
+        this.setState({ loading: false });
       });
   }
 
@@ -151,17 +161,13 @@ class App extends Component {
     await Promise.all(productDetailsPromises);
     productDetailsPromises.forEach(productDetailsPromise => {
       productDetailsPromise
-        .then(function(productDetails) {
+        .then(function (productDetails) {
           data.push(productDetails);
         });
     });
     console.log(data);
     return data;
   }
-
-
-
-
 
   async getProductDetails(productAddress) {
     const productContract = new this.state.web3.eth.Contract(CrowdFundedProduct.abi, productAddress);
@@ -172,42 +178,43 @@ class App extends Component {
 
       productDetails.upc = await productContract.methods.upc().call({ from: this.state.account });
       productDetails.sku = await productContract.methods.sku().call({ from: this.state.account });
+      productDetails.productSupplyChainState = await productContract.methods.productSupplyChainState().call({ from: this.state.account });
 
       productDetails.originFarmerID = await productContract.methods.originFarmerID().call({ from: this.state.account });
       productDetails.originFarmName = await productContract.methods.originFarmName().call({ from: this.state.account });
 
-      //productDetails.productNotes = await productContract.methods.productNotes().call({ from: this.state.account });
+      productDetails.productNotes = await productContract.methods.productNotes().call({ from: this.state.account });
       productDetails.productPrice = await productContract.methods.productPrice().call({ from: this.state.account });
 
-      //productDetails.fundingStage = await productContract.methods.fundingStage().call({ from: this.state.account });
+      productDetails.fundingStage = await productContract.methods.fundingStage().call({ from: this.state.account });
 
       productDetails.beneficiary = await productContract.methods.beneficiary().call({ from: this.state.account });
       productDetails.fundingCap = await productContract.methods.fundingCap().call({ from: this.state.account });
 
       productDetails.deadline = await productContract.methods.deadline().call({ from: this.state.account });
       productDetails.creationTime = await productContract.methods.creationTime().call({ from: this.state.account });
+      productDetails.productContractAddress = productAddress;
     }
     //console.log(productDetails);
     return productDetails;
   }
 
+  async fundProduct(productAddress, contributionAmount) {
+    this.setState({ loading: true });
+    this.state.contract.methods.contribute(productAddress, contributionAmount)
+      .send({
+        from: this.state.account
+      }).on('receipt', async (receipt) => {
+        //await this.loadSupplychainHub()
+        this.setState({ loading: false });
+        console.log(receipt);
+      }).on('error', function (error, receipt) {
+        console.log(error);
+        console.log(receipt);
+        this.setState({ loading: false });
+      });
+  }
 
-
-
-  // getContractState(abi_object, contract_instance, dataElement) {
-  //   for (let i = 0; i < abi_object.length; i++) {
-  //     if (abi_object[i].constant === true &&
-  //       abi_object[i].inputs.length === 0 &&
-  //       //abi_object[i].payable === false &&
-  //       abi_object[i].type === "function") {
-  //       dataElement[abi_object[i].name] = contract_instance.methods[abi_object[i].name].call();
-  //       console.log(abi_object[i].name + "=" + dataElement[abi_object[i].name]);
-  //       contract_instance.methods[abi_object[i].name].call.call((error, res) => {
-  //         console.log(res);
-  //       });
-  //     }
-  //   }
-  // }
 
   renderContent() {
     if (this.state.loading) {
@@ -220,7 +227,7 @@ class App extends Component {
       if (this.state.isUserRegistered) {
         return (
           <ProductListing
-            publishProduct={this.publishProduct} getPublishedProductDetails={this.getPublishedProductDetails} account={this.state.account} userRole={this.state.userRole} {...this.state}
+            fundProduct={this.fundProduct} publishProduct={this.publishProduct} getPublishedProductDetails={this.getPublishedProductDetails} account={this.state.account} userRole={this.state.userRole} {...this.state}
           />
         )
       } else {
@@ -237,7 +244,7 @@ class App extends Component {
   render() {
     return (
       <div className="text-monospace">
-        <Navbar account={this.state.account} />
+        <Navbar account={this.state.account} userName={this.state.userName} userRole={this.state.userRole} />
         <div className='container-fluid mt-5'>
           <div className='row'>
             <main role='main' className="col-lg-12 ml-auto mr-auto">

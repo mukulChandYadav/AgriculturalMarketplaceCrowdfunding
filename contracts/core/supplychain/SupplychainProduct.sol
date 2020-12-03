@@ -31,13 +31,13 @@ contract SupplychainProduct is Ownable {
         .ProposalPublished;
 
     // Product ProductSupplyChainState as represented in the enum above
-    ProductSupplyChainState public itemProductSupplyChainState;
+    ProductSupplyChainState public productSupplyChainState;
 
     constructor(uint256 _upc, uint256 _sku) public {
         upc = _upc;
         sku=_sku;
         // Setting state tp Prposed for crowdfunding
-        itemProductSupplyChainState = defaultProductSupplyChainState;
+        productSupplyChainState = defaultProductSupplyChainState;
     }
 
 
@@ -71,7 +71,7 @@ contract SupplychainProduct is Ownable {
     // Define a modifier that checks if an supplychain state of a product is same as requested one
     modifier atSupplyChainState(ProductSupplyChainState supplychainState) {
         require(
-            itemProductSupplyChainState == supplychainState,
+            productSupplyChainState == supplychainState,
             Tools.append(
                 "The Product is not in required ",
                 getProductSupplyChainStateStr(supplychainState),
@@ -87,7 +87,7 @@ contract SupplychainProduct is Ownable {
     // modifier processed(uint256 _upc) {
     //     StandardProduct product = StandardProduct(products[_upc]);
     //     require(
-    //         product.itemProductSupplyChainState() ==
+    //         product.productSupplyChainState() ==
     //             ProductSupplyChainState.Processed,
     //         "The Product is not in Processed state!"
     //     );
@@ -98,10 +98,10 @@ contract SupplychainProduct is Ownable {
         ProductSupplyChainState newProductSupplyChainState
     ) public returns (bool) {
         require(
-            itemProductSupplyChainState != newProductSupplyChainState,
+            productSupplyChainState != newProductSupplyChainState,
             "Product already in required supply chain state"
         );
-        itemProductSupplyChainState = newProductSupplyChainState;
+        productSupplyChainState = newProductSupplyChainState;
         return true;
     }
 

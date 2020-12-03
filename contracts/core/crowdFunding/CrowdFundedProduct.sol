@@ -65,29 +65,7 @@ contract CrowdFundedProduct is StandardProduct {
         status = ProductFundingStatus.Active;
     }
 
-    
-    // function getProductState()
-    //     public
-    //     view
-    //     returns (CrowdFundedProductState memory)
-    // {
-    //     CrowdFundedProductState memory productState;
-    //     productState.upc = upc;
-    //     productState.sku = sku;
-    //     productState.ownerID = ownerID;
-    //     productState.originFarmerID = originFarmerID;
-    //     productState.originFarmName = originFarmName;
-    //     productState.productNotes = productNotes;
-    //     productState.fundingCap = fundingCap;
-    //     productState.deadline = deadline;
-    //     productState.productPrice = productPrice;
-    //     productState.fundingStage = fundingStage;
-    //     productState.creationTime = creationTime;
-
-    //     return productState;
-    // }
-
-    function projectStatus() public view returns (ProductFundingStatus) {
+    function productStatus() public view returns (ProductFundingStatus) {
         return status;
     }
 

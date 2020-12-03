@@ -7,7 +7,7 @@ import "./CommonUtility.sol";
 import "../base/Ownable.sol";
 
 contract StandardFundingHub is Ownable {
-    mapping(uint256 => address) public products;
+    mapping(uint256 => address) public productAddrs;
     mapping(uint256 => uint256) public upcList;
     uint256 _upc;
 
@@ -24,7 +24,7 @@ contract StandardFundingHub is Ownable {
         uint256 _sku,
         address payable _ownerID,
         string memory _originFarmName,
-        string memory _productNotes,
+        string memory _productAddrNotes,
         uint256 _fundingCap,
         uint256 _deadline
     )
@@ -32,47 +32,47 @@ contract StandardFundingHub is Ownable {
         returns (
             // override
             // atStatus(ProductFundingStatus.Active)
-            CrowdFundedProduct productContract
+            CrowdFundedProduct productAddrContract
         )
     {
-        // bytes32 productHash = keccak256(
+        // bytes32 productAddrHash = keccak256(
         //     abi.encode(msg.sender, _fundingCap, block.timestamp + _deadline)
         // );
 
-        productContract = new CrowdFundedProduct(
+        productAddrContract = new CrowdFundedProduct(
             _upc,
             _sku,
             _ownerID,
             _originFarmName,
-            _productNotes,
+            _productAddrNotes,
             _fundingCap,
             _deadline
         );
-        addProduct(productContract, _upc);
+        addProduct(productAddrContract, _upc);
         _upc = _upc + 1;
-        //emit LogStandardProductCreation(msg.sender, productContract);
+        //emit LogStandardProductCreation(msg.sender, productAddrContract);
     }
 
-    function contribute(CrowdFundedProduct _product, uint256 _amount)
+    function contribute(address productAddr, uint256 amount)
         public
     //override
     //atStatus(ProductFundingStatus.Active)
     {
-        require(address(_product) != address(0) && _amount > 0);
-        CrowdFundedProduct(_product).fund(_amount, msg.sender);
-        //emit LogProductContribution(address(_product), msg.sender, _amount);
+        require(address(productAddr) != address(0) && amount > 0, "Address or Amount check failed");
+        CrowdFundedProduct(productAddr).fund(amount, msg.sender);
+        //emit LogProductContribution(address(_productAddr), msg.sender, _amount);
     }
 
-    function addProduct(CrowdFundedProduct productContract, uint256 upc)
+    function addProduct(CrowdFundedProduct productAddrContract, uint256 upc)
         internal
     {
-        products[upc] = address(productContract);
+        productAddrs[upc] = address(productAddrContract);
     }
 
     function getProductAddresses() public view returns (address[] memory) {
         address[] memory ret = new address[](_upc);
         for (uint256 i = 0; i+1 < _upc; i++) {
-            ret[i] = products[i+1];
+            ret[i] = productAddrs[i+1];
         }
         return ret;
     }

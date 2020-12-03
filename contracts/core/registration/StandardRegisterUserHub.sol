@@ -15,7 +15,7 @@ contract StandardRegisterUserHub is RegisterUserHub {
     }
 
     //Add account to common registry
-    function registerUser(uint256 userRoleType)
+    function registerUser(string memory userName, uint256 userRoleType)
         public
         override
         notRegistered
@@ -40,19 +40,20 @@ contract StandardRegisterUserHub is RegisterUserHub {
                     if (userRoleType == 4) {
                         registeredUsers[msg.sender] = UserRoleType
                             .ForwardMarketConsumer;
-                            addForwardMarketConsumer(msg.sender);
+                        addForwardMarketConsumer(msg.sender);
                         retVal = true;
                     } else {
                         if (userRoleType == 5) {
                             registeredUsers[msg.sender] = UserRoleType
                                 .SportMarketConsumer;
-                                addSpotMarketConsumer(msg.sender);
+                            addSpotMarketConsumer(msg.sender);
                             retVal = true;
                         }
                     }
                 }
             }
         }
+        userNames[msg.sender] = userName;
         return retVal;
     }
 
@@ -70,5 +71,16 @@ contract StandardRegisterUserHub is RegisterUserHub {
         returns (UserRoleType)
     {
         return registeredUsers[msg.sender];
+    }
+
+    
+    function getUserName()
+        public
+        override
+        view
+        hasRegistered
+        returns (string memory)
+    {
+        return userNames[msg.sender];
     }
 }

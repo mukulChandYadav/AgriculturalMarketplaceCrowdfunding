@@ -33,7 +33,7 @@ class PublishProductForm extends Component {
               type='text'
               ref={(input) => { this.productPrice = input }}
               className='form-control'
-              placeholder='Price in Ethers'
+              placeholder='Price in Wei'
               required />
               <br />
             <input
@@ -41,7 +41,7 @@ class PublishProductForm extends Component {
               type='text'
               ref={(input) => { this.fundingCap = input }}
               className='form-control'
-              placeholder='Funding Cap (in Ethers)'
+              placeholder='Funding Cap (in Wei)'
               required />
               <br />
             <input

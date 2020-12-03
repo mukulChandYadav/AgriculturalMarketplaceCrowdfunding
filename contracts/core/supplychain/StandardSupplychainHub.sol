@@ -88,10 +88,10 @@ contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
     function harvestProduct(uint256 _upc)
         public
         onlyFarmer
-        verifyCaller(products[_upc])
+        verifyCaller(productAddrs[_upc])
         returns (bool)
     {
-        require(CrowdFundedProduct(products[_upc]).harvestProduct());
+        require(CrowdFundedProduct(productAddrs[_upc]).harvestProduct());
         return true;
     }
 
@@ -100,7 +100,7 @@ contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
         public
         onlyFarmer
         // Call modifier to verify caller of this function
-        verifyCaller(products[_upc])
+        verifyCaller(productAddrs[_upc])
     {
         // Update the appropriate fields
         // StandardProduct existingProduct = StandardProduct(products[_upc]);

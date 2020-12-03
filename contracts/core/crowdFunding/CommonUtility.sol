@@ -5,25 +5,12 @@ pragma experimental ABIEncoderV2;
 enum ProductFundingStatus {Active, Inactive, Expired, Closed}
 
 enum FundingStage {
-        Open,
-        FundingRaised,
-        CapReached,
-        EarlySuccess,
-        Success,
-        PaidOut,
-        Failed
+        Open, //0
+        FundingRaised, //1
+        CapReached, //2
+        EarlySuccess, //3
+        Success, //4
+        PaidOut, //5
+        Failed //6
     }
 
-// struct CrowdFundedProductState {
-//         uint256 upc;
-//         uint256 sku;
-//         address ownerID;
-//         address originFarmerID;
-//         string originFarmName;
-//         string productNotes;
-//         uint256 fundingCap;
-//         uint256 deadline;
-//         uint256 productPrice;
-//         FundingStage fundingStage;
-//         uint256 creationTime;
-//     }

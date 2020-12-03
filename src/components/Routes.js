@@ -4,9 +4,9 @@ import React, { Component } from 'react';
 
 
 import SignUp from './SignUp';
-import ProductListing from './ProductListing';
+import ProductListing from './productListing/ProductListing';
 import Register from './Register';
-import PublishProductForm from './PublishProductForm';
+import PublishProductForm from './productListing/PublishProductForm';
 import {
     BrowserRouter as Router,
     Switch
