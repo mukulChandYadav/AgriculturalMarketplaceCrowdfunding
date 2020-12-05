@@ -15,25 +15,29 @@ export default {
         console.log(fields.props);
         let fundProduct = fields[fields.length - 1].props.fundProduct;
         const userRole = fields[fields.length - 1].props.userRole;
-        const productContractAddress = props.record.productContractAddress;
-        console.log("In renderer")
-        
+        // const productContractAddress = props.record.productContractAddress;
+        const productID = props.record.universalProductCode;
+        const senderAccount = fields[fields.length - 1].props.account;
+        const receiverAccount = props.record.ownerAccount;
+        console.log("In renderer", "Role", userRole)
 
         var enableCrowdFundFeature = false;
 
-        if ((userRole !== 'Farmer') && (props.record.fundingStage === '0')) { //is not Farmer and fundingStage open
+        if ((userRole !== 'Farmer') && (parseInt(props.record.requiredFunding) !== 0)) {
+            //is not Farmer and fundingStage open
             //Enable crowd fund feature
             enableCrowdFundFeature = true;
         }
 
-        console.log("Should Enable crowd fund contribution:"+enableCrowdFundFeature);
+        console.log("Should Enable crowd fund contribution:" + enableCrowdFundFeature);
 
         return (
             <span>
                 {enableCrowdFundFeature ? (<form onSubmit={(event) => {
                     event.preventDefault();
                     console.log("on submit", this.inputNode.value, event);
-                    fundProduct(productContractAddress, event.target.elements[0].value);
+                    const contributionAmount = event.target.elements[0].value;
+                    fundProduct(receiverAccount, contributionAmount, senderAccount, productID);
                 }}>
 
                     <input
@@ -47,7 +51,7 @@ export default {
 
                     {/* <button onClick={(event) => { fundCompLoader(props.record.upc) }}>Deposit Fund</button> */}
                     <button type='submit' className='btn btn-primary'>Deposit Fund</button>
-                </form>) : null}
+                </form>) : (parseInt(props.record.requiredFunding) === 0) ? (<button disabled className='btn btn-success'>Funded</button>) : null}
 
             </span>
         );

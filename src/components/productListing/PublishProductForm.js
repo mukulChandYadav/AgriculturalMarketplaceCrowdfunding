@@ -10,32 +10,71 @@ class PublishProductForm extends Component {
         <form onSubmit={(event) => {
           event.preventDefault()
           this.props.publishProduct({
-            sku: this.sku.value,
-            productPrice: this.productPrice.value,
-            account: this.props.account,
-            // originFarmName: this.originFarmName.value,
-            // productNotes: this.productNotes.value,
-            fundingCap: this.fundingCap.value,
-            deadline: parseInt(this.deadline.value) * 24 * 3600
+            cropName: this.cropName.value,
+            quantity: this.quantity.value,
+            expectedPrice: this.expectedPrice.value,
+            requiredFunding: this.requiredFunding.value,
+            ownerAccount: this.props.account,
+            // sku: this.sku.value,
+            // productPrice: this.productPrice.value,
+            // account: this.props.account,
+            // // originFarmName: this.originFarmName.value,
+            // // productNotes: this.productNotes.value,
+            // fundingCap: this.fundingCap.value,
+            // deadline: parseInt(this.deadline.value) * 24 * 3600
           })
         }}>
           <div className='form-group mr-sm-2'>
+
             <input
+              id='cropName'
+              type='text'
+              ref={(input) => { this.cropName = input }}
+              className='form-control'
+              placeholder='Crop Name'
+              required />
+            <br />
+            <input
+              id='quantity'
+              type='text'
+              ref={(input) => { this.quantity = input }}
+              className='form-control'
+              placeholder='Quantity'
+              required />
+            <br />
+            <input
+              id='expectedPrice'
+              type='text'
+              ref={(input) => { this.expectedPrice = input }}
+              className='form-control'
+              placeholder='Expected Product Price in Wei'
+              required />
+            <br />
+
+            <input
+              id='requiredFunding'
+              type='text'
+              ref={(input) => { this.requiredFunding = input }}
+              className='form-control'
+              placeholder='Required funding amount in Wei'
+              required />
+            <br />
+            <input
+              id='ownerAccount'
+              type='text'
+              ref={(input) => { this.ownerAccount = input }}
+              className='form-control'
+              value={this.props.account}
+              readOnly /> 
+            {/* <input
               id='sku'
               type='text'
               ref={(input) => { this.sku = input }}
               className='form-control'
               placeholder='Stock Keeping Unit size'
               required />
-            <br />
-            <input
-              id='productPrice'
-              type='text'
-              ref={(input) => { this.productPrice = input }}
-              className='form-control'
-              placeholder='Product Price in Wei'
-              required />
-            <br />
+            <br /> */}
+            {/* 
             <input
               id='fundingCap'
               type='text'
@@ -51,14 +90,6 @@ class PublishProductForm extends Component {
               className='form-control'
               placeholder='Crowdfunding Deadline from now (in days)'
               required />
-            <br />
-            <input
-              id='originFarmerID'
-              type='text'
-              ref={(input) => { this.originFarmerID = input }}
-              className='form-control'
-              value={this.props.account}
-              readOnly />
             {/* <br />
             <input
               id='originFarmName'

@@ -22,9 +22,6 @@ class ProductListing extends Component {
             tableData: []
         }
 
-        //props.getPublishedProductDetails=props.getPublishedProductDetails.bind(this);
-        //this.PublishButton = this.PublishButton.bind(this);
-
     }
 
     async publishNewProduct() {
@@ -58,41 +55,30 @@ class ProductListing extends Component {
 
     }
 
-    // fundProduct(upc) {
-    //     this.setState({
-    //         loadFundProduct: true,
-    //         fundedProduct: upc
-    //     });
-    // }
-
     render() {
 
         console.log("Is farmer:", this.props.userRole === NumToUserRole['1'].toString());
 
         let fields = [
 
-            { name: 'productFundingPageLink', displayName: "Product Details", render: FieldRenderer.productFundingPageLink },
-            { name: 'upc', displayName: "Universal Product code", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'sku', displayName: "Stock Keeping Units", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'productSupplyChainState', displayName: "Product Supplychain State", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'fundingStage', displayName: "Crowd funding product Stage", inputFilterable: true, sortable: true },
-            { name: 'fundingCap', displayName: "Crowd funding cap", inputFilterable: true, sortable: true },
-            { name: 'deadline', displayName: "Crowdfunding deadline", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'creationTime', displayName: "Product publish time", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'ownerID', displayName: "Owner Account ID", inputFilterable: true, sortable: true },
-            { name: 'originFarmerID', displayName: "Origin Farmer ID", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'originFarmName', displayName: "Origin Farm Name", inputFilterable: true, sortable: true },
-            { name: 'productNotes', displayName: "Product Notes", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'beneficiary', displayName: "Crowd funding beneficiary", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'productContractAddress', displayName: "Product Contract Address", inputFilterable: true, sortable: true },
+            { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.productFundingPageLink },
+            { name: 'universalProductCode', displayName: "Universal Product Code", inputFilterable: true, exactFilterable: true, sortable: true },
+            { name: 'cropName', displayName: "Crop Name", inputFilterable: true, sortable: true },
+            { name: 'quantity', displayName: "Quantity", sortable: true },
+            { name: 'expectedPrice', displayName: "Expected Price", sortable: true },
+            { name: 'requiredFunding', displayName: "Required Funding", sortable: true },
+            { name: 'availableFunding', displayName: "Available Funding", sortable: true },
+            { name: 'ownerAccount', displayName: "Owner Account", inputFilterable: true },
             { name: 'props', props: this.props },
         ];
+
+
 
         return (
             <div>
                 <div>
-                    <div>
-                        <button
+                    <div >
+                        <button className='btn btn-primary'
                             hidden={(this.props.userRole !== NumToUserRole['1'].toString()) || this.state.showPublishPage ? true : false}
                             onClick={this.publishNewProduct}>
                             Publish New Product
@@ -100,18 +86,18 @@ class ProductListing extends Component {
                         <br />
                     </div>
                     {
-                        this.state.showPublishPage ? <PublishProductForm account={this.props.accounts} {...this.state} {...this.props} /> : null
+                        this.state.showPublishPage ? <div><PublishProductForm account={this.props.accounts} {...this.state} {...this.props} /></div> : null
                     }{
 
                         this.state.dataReady ?
-                            (<FilterableTable
+                            (<div><FilterableTable
                                 namespace="People"
                                 initialSort="name"
                                 data={this.state.tableData}
                                 fields={fields}
                                 roRecordsMessage="There are no people to display"
                                 noFilteredRecordsMessage="No people match your filters!"
-                            />) : null
+                            /></div>) : null
                     }
                 </div>
             </div>
