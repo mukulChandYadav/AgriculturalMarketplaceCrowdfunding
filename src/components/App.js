@@ -77,7 +77,8 @@ class App extends Component {
       loading: true,
       zeroAddr: '0x0000000000000000000000000000000000000000',
       userName: '',
-      userRole: ''
+      userRole: '',
+      crowdFundedProductContract: CrowdFundedProduct
     }
     this.getPublishedProductDetails = this.getPublishedProductDetails.bind(this);
     this.registerUser = this.registerUser.bind(this);
@@ -114,8 +115,9 @@ class App extends Component {
     this.setState({ loading: true });
     this.state.contract.methods.publishCrowdfundingProposal(args.sku,
       args.account,
-      args.originFarmName,
-      args.productNotes,
+      args.productPrice,
+      //args.originFarmName,
+      //args.productNotes,
       args.fundingCap,
       args.deadline).send({
         from: this.state.account
@@ -181,9 +183,9 @@ class App extends Component {
       productDetails.productSupplyChainState = await productContract.methods.productSupplyChainState().call({ from: this.state.account });
 
       productDetails.originFarmerID = await productContract.methods.originFarmerID().call({ from: this.state.account });
-      productDetails.originFarmName = await productContract.methods.originFarmName().call({ from: this.state.account });
+      //productDetails.originFarmName = await productContract.methods.originFarmName().call({ from: this.state.account });
 
-      productDetails.productNotes = await productContract.methods.productNotes().call({ from: this.state.account });
+      //productDetails.productNotes = await productContract.methods.productNotes().call({ from: this.state.account });
       productDetails.productPrice = await productContract.methods.productPrice().call({ from: this.state.account });
 
       productDetails.fundingStage = await productContract.methods.fundingStage().call({ from: this.state.account });
@@ -201,7 +203,12 @@ class App extends Component {
 
   async fundProduct(productAddress, contributionAmount) {
     this.setState({ loading: true });
-    this.state.contract.methods.contribute(productAddress, contributionAmount)
+    const productContract = new this.state.web3.eth.Contract(CrowdFundedProduct.abi, productAddress);
+
+    const amountRaised = await productContract.methods.amountRaised().call({ from: this.state.account });
+    console.log(amountRaised);
+
+    productContract.methods.fund(contributionAmount, this.state.account)
       .send({
         from: this.state.account
       }).on('receipt', async (receipt) => {
@@ -213,6 +220,20 @@ class App extends Component {
         console.log(receipt);
         this.setState({ loading: false });
       });
+
+
+    //     this.state.contract.methods.contribute(productAddress, contributionAmount)
+    //       .send({
+    //         from: this.state.account
+    //       }).on('receipt', async (receipt) => {
+    //         //await this.loadSupplychainHub()
+    //         this.setState({ loading: false });
+    //         console.log(receipt);
+    //       }).on('error', function (error, receipt) {
+    //         console.log(error);
+    //         console.log(receipt);
+    //         this.setState({ loading: false });
+    //       });
   }
 
 

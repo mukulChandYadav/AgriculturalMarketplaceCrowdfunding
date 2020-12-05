@@ -13,10 +13,10 @@ class PublishProductForm extends Component {
             sku: this.sku.value,
             productPrice: this.productPrice.value,
             account: this.props.account,
-            originFarmName: this.originFarmName.value,
-            productNotes: this.productNotes.value,
-            fundingCap:this.fundingCap.value,
-            deadline:this.deadline.value
+            // originFarmName: this.originFarmName.value,
+            // productNotes: this.productNotes.value,
+            fundingCap: this.fundingCap.value,
+            deadline: parseInt(this.deadline.value) * 24 * 3600
           })
         }}>
           <div className='form-group mr-sm-2'>
@@ -33,9 +33,9 @@ class PublishProductForm extends Component {
               type='text'
               ref={(input) => { this.productPrice = input }}
               className='form-control'
-              placeholder='Price in Wei'
+              placeholder='Product Price in Wei'
               required />
-              <br />
+            <br />
             <input
               id='fundingCap'
               type='text'
@@ -43,7 +43,7 @@ class PublishProductForm extends Component {
               className='form-control'
               placeholder='Funding Cap (in Wei)'
               required />
-              <br />
+            <br />
             <input
               id='deadline'
               type='text'
@@ -59,7 +59,7 @@ class PublishProductForm extends Component {
               className='form-control'
               value={this.props.account}
               readOnly />
-            <br />
+            {/* <br />
             <input
               id='originFarmName'
               type='text'
@@ -74,7 +74,7 @@ class PublishProductForm extends Component {
               ref={(input) => { this.productNotes = input }}
               className='form-control'
               placeholder='Product Notes'
-            />
+            /> */}
           </div>
           <button type='submit' className='btn btn-primary'>Publish Product</button>
         </form>

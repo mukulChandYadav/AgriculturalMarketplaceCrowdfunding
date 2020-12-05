@@ -4,10 +4,10 @@ pragma experimental ABIEncoderV2;
 
 import "../crowdFunding/StandardFundingHub.sol";
 import "../base/Ownable.sol";
-import "../registration/StandardRegisterUserHub.sol";
+//import "../registration/StandardRegisterUserHub.sol";
 
 // Define a contract 'StandardSupplychainHub'
-contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
+contract StandardSupplychainHub is StandardFundingHub {
     // Define a public mapping 'productsHistory' that maps the UPC to an array of TxHash,
     // that track its journey through the supply chain -- to be sent from DApp.
     mapping(uint256 => string[]) productHistory;
@@ -49,33 +49,35 @@ contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
     //     product.consumerID().transfer(amountToReturn);
     // }
 
-    modifier onlyConsumer() {
-        require(
-            (isForwardMarketConsumer(msg.sender) == true) ||
-                (isSpotMarketConsumer(msg.sender) == true)
-        );
-        _;
-    }
+    // modifier onlyConsumer() {
+    //     require(
+    //         //(isForwardMarketConsumer(msg.sender) == true) ||
+    //             //(isSpotMarketConsumer(msg.sender) == true)
+    //     );
+    //     _;
+    // }
 
     // Define a function 'publishCrowdfundingProposal' that allows a farmer to mark an item ready for crowdfunding
     function publishCrowdfundingProposal(
         uint256 sku,
-        address payable _originFarmerID,
-        string memory _originFarmName,
-        string memory _productNotes,
+        address payable originFarmerID,
+        uint256 _productPrice,
+        //string memory _originFarmName,
+        //string memory _productNotes,
         uint256 _fundingCap,
         uint256 _deadline
     )
         public
         //Only Farmer
-        onlyFarmer
+        //onlyFarmer
     {
         // Add the new product for crowdfunding
         CrowdFundedProduct newProduct = createProduct(
             sku,
-            _originFarmerID,
-            _originFarmName,
-            _productNotes,
+            originFarmerID,
+            _productPrice,
+            //_originFarmName,
+            //_productNotes,
             _fundingCap,
             _deadline
         );
@@ -87,7 +89,7 @@ contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
     // Define a function 'harvestProduct' that allows a farmer to mark an item 'Harvested'
     function harvestProduct(uint256 _upc)
         public
-        onlyFarmer
+        //onlyFarmer
         verifyCaller(productAddrs[_upc])
         returns (bool)
     {
@@ -98,7 +100,7 @@ contract StandardSupplychainHub is StandardRegisterUserHub, StandardFundingHub {
     // Define a function 'sellProduct' that allows a farmer to mark an item 'ForSale'
     function sellProduct(uint256 _upc, uint256 _price)
         public
-        onlyFarmer
+        //onlyFarmer
         // Call modifier to verify caller of this function
         verifyCaller(productAddrs[_upc])
     {

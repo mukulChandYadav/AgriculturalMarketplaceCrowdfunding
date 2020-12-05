@@ -6,6 +6,8 @@ let StandardProduct = artifacts.require('StandardProduct.sol');
 let CrowdFundedProduct = artifacts.require('CrowdFundedProduct.sol');
 let StandardFundingHub = artifacts.require('StandardFundingHub.sol');
 
+
+let StandardRegisterUserHub = artifacts.require('StandardRegisterUserHub.sol');
 let StandardSupplychainHub = artifacts.require('StandardSupplychainHub.sol');
 
 // var fundingCap = web3.toWei(2, "ether"); 
@@ -28,11 +30,22 @@ module.exports = function (deployer, network, accounts) {
 
   //deployer.deploy(StandardFundingHub);
 
+
+  deployer.deploy(StandardRegisterUserHub)
+    .then((hub) => {
+      hub.registerUser("Farmer 1", 1, { from: accounts[0] })
+        .then(() => {
+          hub.registerUser("Investor 1", 3, { from: accounts[2] });
+        });
+    });
+
   deployer.deploy(Math);
   deployer.deploy(Tools);
 
   deployer.link(Math, StandardSupplychainHub);
   deployer.link(Tools, StandardSupplychainHub);
+  //deployer.link(StandardRegisterUserHub, StandardSupplychainHub);
+
   //deployer.link(StandardFundingHub, StandardSupplychainHub);
 
 
@@ -47,11 +60,28 @@ module.exports = function (deployer, network, accounts) {
   //     string memory _productNotes,
   //     uint256 _fundingCap,
   //     uint256 _deadline
-  deployer.deploy(StandardSupplychainHub, accounts[5]);
-  // .then(() => {
-  //   return StandardFundingHub.deployed()
-  //     .then((hub) => {
-  //       return hub.createProject(fundingCap, deadlineInSeconds, {from: web3.eth.coinbase});
-  //     })
-  // });
+  deployer.deploy(StandardSupplychainHub, accounts[5])
+    .then(() => {
+      return StandardSupplychainHub.deployed()
+        .then((hub) => {
+          var sku = 10;
+          var ownerID = accounts[0];
+          var productPrice = 1;
+          //var originFarmName = "Farm GNV1";
+          //var productNotes = "High Quality";
+          var fundingCap = 20;
+          var deadline = 20000000;
+          console.log("Creating Product");
+          return hub.publishCrowdfundingProposal(
+            sku,
+            ownerID,
+            productPrice,
+            //originFarmName,
+            //productNotes,
+            fundingCap,
+            deadline,
+            { from: accounts[0] })
+            .then((result) => console.log("Result:" + result));
+        });
+    });
 };

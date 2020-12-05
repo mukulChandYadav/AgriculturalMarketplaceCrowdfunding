@@ -21,13 +21,16 @@ contract StandardProduct is SupplychainProduct {
         uint256 _upc,
         uint256 _sku,
         address payable _ownerID,
-        string memory _originFarmName,
-        string memory _productNotes
+        uint256 _productPrice
+        // string memory _originFarmName,
+        // string memory _productNotes,
+        
     ) public SupplychainProduct(_upc,_sku) {
         ownerID = _ownerID;
         originFarmerID = _ownerID;
-        originFarmName = _originFarmName;
-        productNotes = _productNotes;
+        // originFarmName = _originFarmName;
+        // productNotes = _productNotes;
+        productPrice = _productPrice;
     }
 
     event LogStandardProductCreation (

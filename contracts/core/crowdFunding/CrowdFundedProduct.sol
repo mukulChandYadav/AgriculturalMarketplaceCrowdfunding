@@ -4,13 +4,22 @@ pragma experimental ABIEncoderV2;
 
 import "../tokens/FundingToken.sol";
 import "../products/StandardProduct.sol";
-import "./CommonUtility.sol";
+//import "./CommonUtility.sol";
 
 contract CrowdFundedProduct is StandardProduct {
     enum ProductFundingStatus {Active, Inactive, Expired, Closed}
 
-
     //enum FundingStatus {Active, Inactive, Closed}
+
+    enum FundingStage {
+        Open, //0
+        FundingRaised, //1
+        CapReached, //2
+        EarlySuccess, //3
+        Success, //4
+        PaidOut, //5
+        Failed //6
+    }
 
     //address public creator;
     //uint256 public createdAtBlock;
@@ -48,13 +57,21 @@ contract CrowdFundedProduct is StandardProduct {
         uint256 _upc,
         uint256 _sku,
         address payable _ownerID,
-        string memory _originFarmName,
-        string memory _productNotes,
+        uint256 _productPrice,
+        //string memory _originFarmName,
+        //string memory _productNotes,
         uint256 _fundingCap,
         uint256 _deadline
     )
         public
-        StandardProduct(_upc, _sku, _ownerID, _originFarmName, _productNotes)
+        StandardProduct(
+            _upc,
+            _sku,
+            _ownerID,
+            _productPrice
+            //,_originFarmName,
+            //_productNotes
+        )
     {
         beneficiary = _ownerID;
         fundingCap = _fundingCap;
@@ -112,15 +129,18 @@ contract CrowdFundedProduct is StandardProduct {
 
     function amountRaised() public view returns (uint256 amount) {
         amount = fundingToken.balanceOf(address(this));
+        return amount;
     }
 
     function fund(uint256 _funding, address investor)
         public
         evalExpiry
         evalFundingStage
+        returns (bool)
     {
         require(
-            fundingStage == FundingStage.Open || fundingStage == FundingStage.FundingRaised
+            fundingStage == FundingStage.Open ||
+                fundingStage == FundingStage.FundingRaised
         );
 
         // Reduce contribution amount if it exceeds funding cap, or overflows
@@ -144,6 +164,7 @@ contract CrowdFundedProduct is StandardProduct {
         } else {
             fundingStage = FundingStage.FundingRaised;
         }
+        return true;
     }
 
     function refund()
@@ -151,6 +172,7 @@ contract CrowdFundedProduct is StandardProduct {
         //override
         evalExpiry
         evalFundingStage
+        returns (bool)
     {
         require(fundingStage == FundingStage.Failed);
         uint256 toRefund = fundingToken.contributionOf(msg.sender);
@@ -158,6 +180,7 @@ contract CrowdFundedProduct is StandardProduct {
         require(updateProductStatus(ProductSupplyChainState.ProductErrorState));
 
         emit LogRefund(msg.sender, address(this), toRefund);
+        return true;
     }
 
     function payout()
@@ -165,9 +188,11 @@ contract CrowdFundedProduct is StandardProduct {
         //override
         evalExpiry
         evalFundingStage
+        returns (bool)
     {
         require(
-            fundingStage == FundingStage.Success || fundingStage == FundingStage.EarlySuccess
+            fundingStage == FundingStage.Success ||
+                fundingStage == FundingStage.EarlySuccess
         );
 
         uint256 payOut = fundingToken.balanceOf(address(this));
@@ -178,6 +203,7 @@ contract CrowdFundedProduct is StandardProduct {
             updateProductStatus(ProductSupplyChainState.RequiredFundingAchieved)
         );
         emit LogPayout(beneficiary, payOut);
+        return true;
     }
 
     function toggleActive() public onlyOwner {

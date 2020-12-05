@@ -22,24 +22,20 @@ contract SupplychainProduct is Ownable {
         Purchased // 10
     }
 
-
     // Define a variable called 'upc' for Universal Product Code (UPC)
     uint256 public upc;
     // Define a variable called 'sku' for Stock Keeping Unit (SKU)
     uint256 public sku;
-    ProductSupplyChainState constant defaultProductSupplyChainState = ProductSupplyChainState
-        .ProposalPublished;
 
     // Product ProductSupplyChainState as represented in the enum above
     ProductSupplyChainState public productSupplyChainState;
 
     constructor(uint256 _upc, uint256 _sku) public {
         upc = _upc;
-        sku=_sku;
+        sku = _sku;
         // Setting state tp Prposed for crowdfunding
-        productSupplyChainState = defaultProductSupplyChainState;
+        productSupplyChainState = ProductSupplyChainState.ProposalPublished;
     }
-
 
     function getProductSupplyChainStateStr(ProductSupplyChainState scs)
         internal

@@ -32,6 +32,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
     "truffle": "5.1.45",
+    "truffle-hdwallet-provider": "^1.0.17",
     "web3": "1.2.6"
   },
   "browserslist": [
