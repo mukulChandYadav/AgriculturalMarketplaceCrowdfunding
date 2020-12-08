@@ -207,9 +207,8 @@ class App extends Component {
       from: this.state.account,
       gas: 2000000
     }).on('receipt', async (receipt) => {
-      await this.loadContract()
-      console.log(receipt)
-      this.setState({ loading: false })
+      console.log(receipt);
+      this.setState({ loading: false });
     }).on('error', function (error, receipt) {
       console.log(error);
       console.log(receipt);
@@ -264,6 +263,11 @@ class App extends Component {
             });
           });
       });
+      const balance = await this.state.structStorageContract.methods
+        .getBalance(this.state.account)
+        .call({ from: this.state.account });
+      this.setState({ userBalance: balance });
+      console.log(this.state.account+":balance-"+balance);
       console.log(data);
     } else {
       console.error("structStorageContract not loaded");
@@ -367,7 +371,7 @@ class App extends Component {
   render() {
     return (
       <div className="text-monospace">
-        <Navbar account={this.state.account} userName={this.state.userName} userRole={this.state.userRole} />
+        <Navbar account={this.state.account} userName={this.state.userName} userRole={this.state.userRole} userBalance={this.state.userBalance}/>
         <div className='container-fluid mt-5'>
           <div className='row'>
             <main role='main' className="col-lg-12 ml-auto mr-auto">

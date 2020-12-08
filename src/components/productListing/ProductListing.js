@@ -61,9 +61,10 @@ class ProductListing extends Component {
 
         let fields = [
 
-            { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.productFundingPageLink },
+            
             { name: 'universalProductCode', displayName: "Universal Product Code", inputFilterable: true, exactFilterable: true, sortable: true },
             { name: 'cropName', displayName: "Crop Name", inputFilterable: true, sortable: true },
+            { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.productFundingPageLink },
             { name: 'quantity', displayName: "Quantity", sortable: true },
             { name: 'expectedPrice', displayName: "Expected Price", sortable: true },
             { name: 'requiredFunding', displayName: "Required Funding", sortable: true },

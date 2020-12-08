@@ -19,12 +19,17 @@ class Navbar extends Component {
         <ul className="navbar-nav px-3">
           <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
             <small className="text-secondary">
-              <strong id="UserName">{this.props.userName}</strong>
-            </small>
-          </li>
-          <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-            <small className="text-secondary">
-              <small id="UserRole">{this.props.userRole}</small>
+              <ul>
+                <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <strong id="UserName" className="text-secondary">{this.props.userName !== 'undefined' && this.props.userName !== '' ? 'Name:' + this.props.userName : ''}</strong>
+                </li>
+                <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <small id="UserRole" className="text-secondary">{this.props.userRole !== 'undefined' && this.props.userRole !== '' ? 'User Role:' + this.props.userRole : ''}</small>
+                </li>
+                <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <small id="Balance" className="text-secondary">{this.props.userBalance !== 'undefined' ? 'Balance Token:' + this.props.userBalance : ''}</small>
+                </li>
+              </ul>
             </small>
           </li>
         </ul>

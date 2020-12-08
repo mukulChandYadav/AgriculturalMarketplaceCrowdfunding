@@ -45,12 +45,12 @@ export default {
                         type='text'
                         ref={(input) => { this.inputNode = input }}
                         className='form-control'
-                        placeholder='Contribute funds (in Wei)'
+                        placeholder='Amount (in Wei)'
                         required />
                     <br />
 
                     {/* <button onClick={(event) => { fundCompLoader(props.record.upc) }}>Deposit Fund</button> */}
-                    <button type='submit' className='btn btn-primary'>Deposit Fund</button>
+                    <button type='submit' variant="primary" className='btn btn-primary' size="sm">Contribute</button>
                 </form>) : (parseInt(props.record.requiredFunding) === 0) ? (<button disabled className='btn btn-success'>Funded</button>) : null}
 
             </span>
