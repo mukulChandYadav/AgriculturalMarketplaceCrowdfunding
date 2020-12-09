@@ -2,9 +2,16 @@ import React, { Component } from 'react';
 
 class PublishProductForm extends Component {
 
+  constructor(props) {
+    super(props)
+    this.state = {
+      'visible': true
+    };
+  }
+
   render() {
     return (
-      <div id='content'>
+      this.state.visible ? (<div id='content'>
         <h1>Publish Product</h1>
         <p>Published product will be tracked for crowd funding</p>
         <form onSubmit={(event) => {
@@ -65,7 +72,7 @@ class PublishProductForm extends Component {
               ref={(input) => { this.ownerAccount = input }}
               className='form-control'
               value={this.props.account}
-              readOnly /> 
+              readOnly />
             {/* <input
               id='sku'
               type='text'
@@ -107,9 +114,9 @@ class PublishProductForm extends Component {
               placeholder='Product Notes'
             /> */}
           </div>
-          <button type='submit' className='btn btn-primary'>Publish Product</button>
+          <button type='submit' className='btn btn-primary'>Publish Product</button>&nbsp;&nbsp;<button onClick={(event) => { this.setState({ 'visible': false }) }} className='btn btn-secondary'>Cancel</button>
         </form>
-      </div>
+      </div>) : null
     );
   }
 }

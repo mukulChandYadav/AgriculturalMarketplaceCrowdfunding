@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 //import {Link} from 'react-router-dom';
 import { UserRoleToNum, NumToUserRole, /*FundingStage*/ } from '../Constants';
 import PublishProductForm from './PublishProductForm';
-
 import FieldRenderer from './FieldRenderer';
 
 
@@ -61,14 +60,16 @@ class ProductListing extends Component {
 
         let fields = [
 
-            
             { name: 'universalProductCode', displayName: "Universal Product Code", inputFilterable: true, exactFilterable: true, sortable: true },
             { name: 'cropName', displayName: "Crop Name", inputFilterable: true, sortable: true },
             { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.productFundingPageLink },
+            { name: 'userRating', displayName: "Owner Rating", render: FieldRenderer.userRating },
             { name: 'quantity', displayName: "Quantity", sortable: true },
             { name: 'expectedPrice', displayName: "Expected Price", sortable: true },
             { name: 'requiredFunding', displayName: "Required Funding", sortable: true },
             { name: 'availableFunding', displayName: "Available Funding", sortable: true },
+            { name: 'supplyChainStage', displayName: "Supplychain Stage", sortable: true },
+            { name: 'ownerName', displayName: "Owner Name", sortable: true, inputFilterable: true, exactFilterable: true },
             { name: 'ownerAccount', displayName: "Owner Account", inputFilterable: true },
             { name: 'props', props: this.props },
         ];
@@ -78,12 +79,14 @@ class ProductListing extends Component {
         return (
             <div>
                 <div>
+                    <br />
+                    <br />
                     <div >
-                        <button className='btn btn-primary'
-                            hidden={(this.props.userRole !== NumToUserRole['1'].toString()) || this.state.showPublishPage ? true : false}
+                        {((this.props.userRole !== NumToUserRole['1'].toString()) || (this.state.showPublishPage ? true : false)) ? null : (<button className='btn btn-primary'
                             onClick={this.publishNewProduct}>
                             Publish New Product
-                        </button>
+                        </button>)}
+                        <br />
                         <br />
                     </div>
                     {
@@ -96,8 +99,8 @@ class ProductListing extends Component {
                                 initialSort="name"
                                 data={this.state.tableData}
                                 fields={fields}
-                                roRecordsMessage="There are no people to display"
-                                noFilteredRecordsMessage="No people match your filters!"
+                                roRecordsMessage="There are no products to display"
+                                noFilteredRecordsMessage="No product match your filters!"
                             /></div>) : null
                     }
                 </div>

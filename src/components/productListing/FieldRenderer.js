@@ -1,11 +1,13 @@
 import React from 'react';
+import { UserRoleToNum } from '../Constants';
+import ReactStars from "react-rating-stars-component";
 
 //import { NumToUserRole } from '../Constants';
 // https://www.npmjs.com/package/react-filterable-table
 // https://github.com/ianwitherow/react-filterable-table/blob/master/example-alt/js/FieldRenders.js
 export default {
     productFundingPageLink: function (props) {
-        //;
+
         let fields = props.fields;
         console.log("props");
         console.log(props);
@@ -17,7 +19,7 @@ export default {
         const userRole = fields[fields.length - 1].props.userRole;
         // const productContractAddress = props.record.productContractAddress;
         const productID = props.record.universalProductCode;
-        const senderAccount = fields[fields.length - 1].props.account;
+        //const senderAccount = fields[fields.length - 1].props.account;
         const receiverAccount = props.record.ownerAccount;
         console.log("In renderer", "Role", userRole)
 
@@ -37,11 +39,11 @@ export default {
                     event.preventDefault();
                     console.log("on submit", this.inputNode.value, event);
                     const contributionAmount = event.target.elements[0].value;
-                    fundProduct(receiverAccount, contributionAmount, senderAccount, productID);
+                    fundProduct(receiverAccount, contributionAmount, UserRoleToNum[userRole], productID);
                 }}>
 
                     <input
-                        id={"amount" + props.record.upc}
+                        id={"amount" + props.record.universalProductCode}
                         type='text'
                         ref={(input) => { this.inputNode = input }}
                         className='form-control'
@@ -55,5 +57,27 @@ export default {
 
             </span>
         );
+    },
+    userRating: function (props) {
+
+        const val = getVal();
+        function ratingChanged() {
+
+        }
+        function getVal() {
+            return (Math.random() * Math.floor(6));
+        }
+        return (
+        <ReactStars
+            count={5}
+            onChange={ratingChanged}
+            value={val}
+            size={15}
+            isHalf={true}
+            emptyIcon={<i className="far fa-star"></i>}
+            halfIcon={<i className="fa fa-star-half-alt"></i>}
+            fullIcon={<i className="fa fa-star"></i>}
+            activeColor="#ffd700"
+        />);
     }
 }

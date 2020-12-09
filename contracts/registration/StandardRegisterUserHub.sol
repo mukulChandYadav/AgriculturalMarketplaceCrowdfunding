@@ -83,4 +83,13 @@ contract StandardRegisterUserHub is RegisterUserHub {
     {
         return userNames[msg.sender];
     }
+
+    function getUserNameOf(address accountAddress)
+        public
+        view
+        //hasRegistered
+        returns (string memory)
+    {
+        return userNames[accountAddress];
+    }
 }

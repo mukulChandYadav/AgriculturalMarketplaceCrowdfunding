@@ -1,82 +1,172 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
-pragma experimental ABIEncoderV2;
+//pragma experimental ABIEncoderV2;
 
 //pragma solidity ^0.5.0;
+import "./SupplychainHub.sol";
+import "./base/Ownable.sol";
 
-contract StructStorage {
-    //uint256 public s = 1;
-    uint256 public upc;
-    //uint256 public t = 1;
-    mapping(address => uint256) balances;
+contract StructStorage is Ownable {
+    SupplychainHub supplychainProductStateContract;
 
-    struct farmer {
+    struct product {
         uint256 universalProductCode;
         bytes32 cropName;
         uint256 quantity;
         uint256 expectedPrice;
         uint256 requiredFunding;
         uint256 availableFunding;
-        address ownerAccount;
+        address payable ownerAccount;
     }
 
-    // struct lot {
-    //     bytes lotno;
-    //     bytes grade;
-    //     uint256 mrp;
-    //     bytes32 testdate;
-    //     bytes32 expdate;
-    // }
+    mapping(uint256 => product) productIdToProductMapping;
 
-    //address public tester;
-    address owner;
-
-    mapping(uint256 => farmer) farmerIdToProductMapping;
-
-    //farmer[] public farmerProducts;
-
-    // mapping(bytes => lot) l1;
-    // lot[] public l;
-
-    constructor() public {
-        upc = 1;
+    constructor(SupplychainHub _supplychainProductStateContract) public {
+        supplychainProductStateContract = _supplychainProductStateContract;
     }
 
-    function fundaddr(address addr) public {
-        balances[addr] = 2000;
+    function upc() public view returns (uint256) {
+        return supplychainProductStateContract.upc();
     }
 
-    function sendCoin(
-        address receiver,
-        uint256 amount,
-        address sender
-    ) public returns (bool sufficient) {
-        if (balances[sender] < amount) return false;
+    function getSupplychainStage(uint256 _upc) public view returns (uint256) {
+        return
+            uint256(supplychainProductStateContract.getSupplychainStatus(_upc));
+    }
 
-        balances[sender] -= amount;
-        balances[receiver] += amount;
-
-        return true;
+    modifier isFunder(uint8 _userRoleType) {
+        require(_userRoleType == 2 || _userRoleType == 3);
+        _;
     }
 
     function fundProduct(
-        address receiver,
-        uint256 amount,
-        address sender,
-        uint256 universalProductCode
-    ) public returns (bool) {
-        farmer storage f = farmerIdToProductMapping[universalProductCode];
-        if (f.requiredFunding <= amount) {
-            amount = f.requiredFunding;
+        address payable receiver,
+        uint8 userRoleType,
+        uint8 _universalProductCode
+    ) public payable isFunder(userRoleType) returns (bool) {
+        require(msg.sender.balance >= msg.value);
+        product storage p = productIdToProductMapping[_universalProductCode];
+        uint256 amount = msg.value;
+        if (p.requiredFunding <= amount) {
+            //Required funding
+            amount = p.requiredFunding;
         }
-        f.requiredFunding -= amount;
-        f.availableFunding += amount;
-        require(sendCoin(receiver, amount, sender));
+        p.requiredFunding -= amount; //Required funding
+        p.availableFunding += amount; //Available funding
+        require(receiver.send(amount));
+        if (amount < msg.value) {
+            require(msg.sender.send(msg.value - amount));
+        }
+        if (userRoleType == 3) {
+            // 3 - Investor user role index
+            //Investor needs to be paid back when item is put on sale
+            require(
+                supplychainProductStateContract.acceptFundsFromSender(
+                    _universalProductCode,
+                    msg.sender,
+                    amount
+                )
+            );
+        }
+        if (p.requiredFunding == 0) {
+            require(
+                supplychainProductStateContract.updateSupplychainStatus(
+                    p.universalProductCode,
+                    SupplychainHub.SupplychainStage.ProductFunded
+                )
+            );
+        }
+        return true;
+    }
+
+    function harvestProduct(uint256 _upc) public payable returns (bool) {
+        require(
+            supplychainProductStateContract.getSupplychainStatus(_upc) ==
+                SupplychainHub.SupplychainStage.ProductFunded
+        );
+
+        product memory p = productIdToProductMapping[_upc];
+        // Sell to Supply chain hub
+        address payable buyer = supplychainProductStateContract.getOwner();
+        //Change ownership to market place
+        p.ownerAccount = buyer;
+
+        // Transfer crowd funded amount to market owner
+        require(buyer.send(p.availableFunding));
+
+        require(
+            supplychainProductStateContract.updateSupplychainStatus(
+                _upc,
+                SupplychainHub.SupplychainStage.Harvested
+            )
+        );
+        return true;
+    }
+
+    // Supplychain hub makes the purchase
+    function markProductForSale(uint256 _upc) public payable returns (bool) {
+        require(
+            supplychainProductStateContract.getSupplychainStatus(_upc) ==
+                SupplychainHub.SupplychainStage.Harvested
+        );
+        product memory p = productIdToProductMapping[_upc];
+
+        // Sell to Supply chain hub
+        address payable buyer = supplychainProductStateContract.getOwner();
+        require(msg.sender == buyer); // Supplychain hub makes the purchase
+        // Farmers(owner) receive expected price
+        address payable seller = p.ownerAccount;
+        require(seller.send(p.expectedPrice));
+
+        // Investors paid out by market place,i.e. current owner of product
+        address[] memory investors = supplychainProductStateContract
+            .getListOfPayblesForProduct(_upc);
+        for (uint8 i = 0; i < investors.length; ++i) {
+            uint256 amount = supplychainProductStateContract
+                .getPaybleOwedAmountForProduct(_upc, investors[i]);
+            require(payable(investors[i]).send(amount));
+            require(
+                supplychainProductStateContract.markFundsReleasedToContributor(
+                    _upc,
+                    payable(investors[i])
+                )
+            );
+        }
+
+        require(
+            supplychainProductStateContract.updateSupplychainStatus(
+                _upc,
+                SupplychainHub.SupplychainStage.OnSale
+            )
+        );
+        return true;
+    }
+
+    function saleToCustomer(uint256 _upc) public payable returns (bool) {
+        require(
+            supplychainProductStateContract.getSupplychainStatus(_upc) ==
+                SupplychainHub.SupplychainStage.OnSale
+        );
+
+        product memory p = productIdToProductMapping[_upc];
+        require(msg.value > p.expectedPrice);
+        // Supply chain hub paid
+        address payable marketOwner = p.ownerAccount;
+        require(marketOwner.send(msg.value));
+        //TransferOwnership
+        p.ownerAccount = msg.sender;
+        require(p.ownerAccount == msg.sender);
+        require(
+            supplychainProductStateContract.updateSupplychainStatus(
+                _upc,
+                SupplychainHub.SupplychainStage.Sold
+            )
+        );
         return true;
     }
 
     function getBalance(address addr) public view returns (uint256) {
-        return balances[addr];
+        return addr.balance; //balances[addr];
     }
 
     function produce(
@@ -85,8 +175,10 @@ contract StructStorage {
         uint256 expectedPrice,
         uint256 requiredFunding
     ) public returns (bool) {
-        StructStorage.farmer memory fnew = farmer(
-            upc,
+        //SupplychainHub scHub = SupplychainHub(supplychainProductStateContract);
+        uint256 currentUPC = supplychainProductStateContract.upc();
+        StructStorage.product memory fnew = product(
+            currentUPC,
             cropName,
             quantity,
             expectedPrice,
@@ -94,16 +186,10 @@ contract StructStorage {
             0,
             msg.sender
         );
-        farmerIdToProductMapping[upc] = fnew;
-        //farmerProducts.push(fnew);
-
-        upc += 1;
+        productIdToProductMapping[currentUPC] = fnew;
+        require(supplychainProductStateContract.incrementProductCodeCounter());
         return true;
     }
-
-    // function getProductIDCounterInclusive() public view returns (uint256) {
-    //     return upc;
-    // }
 
     function getproduce(uint256 universalProductCode)
         public
@@ -119,46 +205,14 @@ contract StructStorage {
         )
     {
         return (
-            farmerIdToProductMapping[universalProductCode].universalProductCode,
-            farmerIdToProductMapping[universalProductCode].cropName,
-            farmerIdToProductMapping[universalProductCode].quantity,
-            farmerIdToProductMapping[universalProductCode].expectedPrice,
-            farmerIdToProductMapping[universalProductCode].requiredFunding,
-            farmerIdToProductMapping[universalProductCode].availableFunding,
-            farmerIdToProductMapping[universalProductCode].ownerAccount
+            productIdToProductMapping[universalProductCode]
+                .universalProductCode,
+            productIdToProductMapping[universalProductCode].cropName,
+            productIdToProductMapping[universalProductCode].quantity,
+            productIdToProductMapping[universalProductCode].expectedPrice,
+            productIdToProductMapping[universalProductCode].requiredFunding,
+            productIdToProductMapping[universalProductCode].availableFunding,
+            productIdToProductMapping[universalProductCode].ownerAccount
         );
     }
-
-    // function quality(
-    //     bytes memory ll,
-    //     bytes memory g,
-    //     uint256 p,
-    //     bytes32 tt,
-    //     bytes32 e
-    // ) public {
-    //     StructStorage.lot memory lnew = lot(ll, g, p, tt, e);
-    //     l1[ll] = lnew;
-    //     l.push(lnew);
-    //     t++;
-    // }
-
-    // function getquality(bytes memory k)
-    //     public
-    //     view
-    //     returns (
-    //         bytes memory,
-    //         bytes memory,
-    //         uint256,
-    //         bytes32,
-    //         bytes32
-    //     )
-    // {
-    //     return (
-    //         l1[k].lotno,
-    //         l1[k].grade,
-    //         l1[k].mrp,
-    //         l1[k].testdate,
-    //         l1[k].expdate
-    //     );
-    // }
 }

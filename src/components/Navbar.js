@@ -20,15 +20,15 @@ class Navbar extends Component {
           <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
             <small className="text-secondary">
               <ul>
-                <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-                  <strong id="UserName" className="text-secondary">{this.props.userName !== 'undefined' && this.props.userName !== '' ? 'Name:' + this.props.userName : ''}</strong>
-                </li>
-                <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-                  <small id="UserRole" className="text-secondary">{this.props.userRole !== 'undefined' && this.props.userRole !== '' ? 'User Role:' + this.props.userRole : ''}</small>
-                </li>
-                <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-                  <small id="Balance" className="text-secondary">{this.props.userBalance !== 'undefined' ? 'Balance Token:' + this.props.userBalance : ''}</small>
-                </li>
+                {(this.props.userName !== undefined) ? (<li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <strong id="UserName" className="text-secondary"> {'Name:' + this.props.userName}</strong>
+                </li>) : null}
+                {(this.props.userRole !== undefined) ? (<li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <small id="UserRole" className="text-secondary">{'User Role:' + this.props.userRole}</small>
+                </li>) : null}
+                {(this.props.userBalance !== undefined) ? <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <small id="Balance" className="text-secondary">{'Balance:' + this.props.userBalance}</small>
+                </li> : null}
               </ul>
             </small>
           </li>

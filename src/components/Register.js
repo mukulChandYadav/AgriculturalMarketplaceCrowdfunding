@@ -10,7 +10,8 @@ class Register extends Component {
                 event.preventDefault()
                 this.props.registerUser(this.userName.value, this.userRole.value)
               }}>
-
+<br/>
+<br/>
                 <p>Welcome to portal for Decentralized crowdfunding of Agricultural Marketplace products.
                 This portal leverages Ethereum based smart contract infrastructure to facilitate Agro-based product
                 funding and supplychain management procedures in the form of a DApp</p>
