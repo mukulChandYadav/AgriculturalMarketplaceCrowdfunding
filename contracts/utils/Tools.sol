@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
-
+// Common library for optimized common utility
 library Tools {
     function append(
         string memory a,

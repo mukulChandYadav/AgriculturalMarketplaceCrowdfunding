@@ -6,6 +6,7 @@ pragma solidity >=0.4.22 <0.8.0;
 import "./SupplychainHub.sol";
 import "./base/Ownable.sol";
 
+// Controller contract for product interaction & workflow
 contract StructStorage is Ownable {
     SupplychainHub supplychainProductStateContract;
 
@@ -21,35 +22,41 @@ contract StructStorage is Ownable {
 
     mapping(uint256 => product) productIdToProductMapping;
 
-    // constructor() public {
-    //     // Only for testing
-    // }
-
-    // Only for testing
-    // function setSupplychainHubInstance(
-    //     SupplychainHub _supplychainProductStateContract
-    // ) public {
-    //     supplychainProductStateContract = _supplychainProductStateContract;
-    // }
-
     constructor(SupplychainHub _supplychainProductStateContract) public {
         supplychainProductStateContract = _supplychainProductStateContract;
     }
 
+    /**
+     * Get universal product code counter
+     * Used to list all products
+     *
+     */
     function upc() public view returns (uint256) {
         return supplychainProductStateContract.upc();
     }
 
+    /**
+     * Get supply chain state of a product by productID
+     *
+     */
     function getSupplychainStage(uint256 _upc) public view returns (uint256) {
         return
             uint256(supplychainProductStateContract.getSupplychainStatus(_upc));
     }
 
+    /**
+     * Modifier for funder(Investor/Donor) user verification
+     *
+     */
     modifier isFunder(uint8 _userRoleType) {
         require(_userRoleType == 2 || _userRoleType == 3);
         _;
     }
 
+    /**
+     * Fund product identified by productID,
+     * for userRoleType & receiver address - receives the fund
+     */
     function fundProduct(
         address payable receiver,
         uint8 userRoleType,
@@ -90,6 +97,10 @@ contract StructStorage is Ownable {
         return true;
     }
 
+    /**
+     * Move product identified by product code to harvest state
+     *
+     */
     function harvestProduct(uint256 _upc) public payable returns (bool) {
         require(
             supplychainProductStateContract.getSupplychainStatus(_upc) ==
@@ -114,7 +125,10 @@ contract StructStorage is Ownable {
         return true;
     }
 
-    // Supplychain hub makes the purchase
+    /**
+     * Move product to market place and pay out investors
+     * Supplychain hub makes the purchase
+     */
     function markProductForSale(uint256 _upc) public payable returns (bool) {
         require(
             supplychainProductStateContract.getSupplychainStatus(_upc) ==
@@ -153,6 +167,10 @@ contract StructStorage is Ownable {
         return true;
     }
 
+    /**
+     * Move product to market place and pay out investors
+     * Supplychain hub makes the purchase
+     */
     function saleToCustomer(uint256 _upc) public payable returns (bool) {
         require(
             supplychainProductStateContract.getSupplychainStatus(_upc) ==
@@ -176,10 +194,18 @@ contract StructStorage is Ownable {
         return true;
     }
 
+    /**
+     * Get balance amount of user address
+     * 
+     */
     function getBalance(address addr) public view returns (uint256) {
         return addr.balance; //balances[addr];
     }
 
+    /**
+     * Publish a product campaign onto portal
+     *
+     */
     function produce(
         bytes32 cropName,
         uint256 quantity,
@@ -202,6 +228,10 @@ contract StructStorage is Ownable {
         return true;
     }
 
+    /**
+     * Get product details by productID
+     *
+     */
     function getproduce(uint256 universalProductCode)
         public
         view

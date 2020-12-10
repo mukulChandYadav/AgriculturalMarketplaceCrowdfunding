@@ -2,7 +2,7 @@
 pragma solidity >=0.4.22 <0.8.0;
 
 import "./RegisterUserHub.sol";
-
+// Implementation for RegisterUserHub abstract class
 contract StandardRegisterUserHub is RegisterUserHub {
     modifier notRegistered() {
         require(registeredUsers[msg.sender] == UserRoleType.DefaultPlaceholder);
@@ -73,7 +73,7 @@ contract StandardRegisterUserHub is RegisterUserHub {
         return registeredUsers[msg.sender];
     }
 
-    
+    // Get sender accounts registered userName
     function getUserName()
         public
         override
@@ -84,6 +84,7 @@ contract StandardRegisterUserHub is RegisterUserHub {
         return userNames[msg.sender];
     }
 
+    //Get username of another EOA user
     function getUserNameOf(address accountAddress)
         public
         view

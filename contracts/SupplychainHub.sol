@@ -6,14 +6,15 @@ pragma solidity >=0.4.22 <0.8.0;
 //pragma solidity ^0.5.0;
 import "./base/Ownable.sol";
 
+// Manages product supplychain stage transitions
 contract SupplychainHub is Ownable {
     enum SupplychainStage {
-        DefaultState,//0
-        ProductPublished,//1 //TODO: Add funding deadline
-        ProductFunded,//2
-        Harvested,//3
-        OnSale,//4
-        Sold//5
+        DefaultState, //0
+        ProductPublished, //1
+        ProductFunded, //2
+        Harvested, //3
+        OnSale, //4
+        Sold //5
     }
     uint256 public upc;
     mapping(uint256 => SupplychainStage) upcToSupplychainStage;
@@ -25,6 +26,10 @@ contract SupplychainHub is Ownable {
         upc = 1;
     }
 
+    /**
+     * Add contributors elligible for payout on harvest
+     *
+     */
     function acceptFundsFromSender(
         uint256 _universalProductCode,
         address payable contributor,
@@ -36,6 +41,10 @@ contract SupplychainHub is Ownable {
         return true;
     }
 
+    /**
+     * Mark contributors as paid after product has been harvested
+     *
+     */
     function markFundsReleasedToContributor(
         uint256 _universalProductCode,
         address payable contributor
@@ -45,6 +54,10 @@ contract SupplychainHub is Ownable {
         return true;
     }
 
+    /**
+     * Get total amount for product owed to investors
+     * 
+     */
     function getPaybleOwedAmountForProduct(
         uint256 _universalProductCode,
         address contributor
@@ -52,6 +65,10 @@ contract SupplychainHub is Ownable {
         return payablesToProductIdToAmount[contributor][_universalProductCode];
     }
 
+    /**
+     * Get list of investors for product
+     * 
+     */
     function getListOfPayblesForProduct(uint256 _universalProductCode)
         public
         view
@@ -85,6 +102,10 @@ contract SupplychainHub is Ownable {
         return listOfPayable;
     }
 
+    /**
+     * Update  product supplychain status
+     *
+     */
     function updateSupplychainStatus(uint256 _upc, SupplychainStage stage)
         public
         returns (bool)
@@ -93,6 +114,10 @@ contract SupplychainHub is Ownable {
         return true;
     }
 
+    /**
+     * Get product supplychain status
+     *
+     */
     function getSupplychainStatus(uint256 _upc)
         public
         view
@@ -101,6 +126,10 @@ contract SupplychainHub is Ownable {
         return upcToSupplychainStage[_upc];
     }
 
+    /**
+     * Increment Product counter
+     *
+     */
     function incrementProductCodeCounter() public returns (bool) {
         uint256 oldUpc = upc;
         upc += 1;
