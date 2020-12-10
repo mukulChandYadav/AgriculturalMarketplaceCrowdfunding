@@ -14,7 +14,7 @@ class Navbar extends Component {
           rel="noopener noreferrer"
         >
           <img src={logo} width="30" height="30" className="align-top" alt="" />
-          &nbsp;Crowdfunded Agriculture Marketplace
+          Crowdfunded Agriculture Marketplace
         </a>
         <ul className="navbar-nav px-3">
           <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
