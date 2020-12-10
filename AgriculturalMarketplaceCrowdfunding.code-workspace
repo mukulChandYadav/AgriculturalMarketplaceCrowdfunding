@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../Ethereum-Crowdfunding"
+		},
+		{
+			"path": "../blockchain-supply-chain-concept"
+		},
+		{
+			"path": "../truffle-webpack-demo"
+		},
+		{
+			"path": "../supply_chain"
+		},
+		{
+			"path": "../AgroChain"
+		}
+	]
+}
