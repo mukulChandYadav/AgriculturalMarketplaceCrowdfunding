@@ -108,8 +108,8 @@ npm run start (Dev)
 
 ## Authors
 
-Abhijeet Kumar
-Mukul Chand Yadav
+* Abhijeet Kumar
+* Mukul Chand Yadav
 
 
 ## Acknowledgments
