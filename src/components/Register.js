@@ -52,7 +52,7 @@ class Register extends Component {
 
                     <br />
             
-                        <input type="submit" value="Submit" className='btn btn-primary' />
+                        <input type="submit" value="Register" className='btn btn-primary' />
 
                 </form>
             </div>
