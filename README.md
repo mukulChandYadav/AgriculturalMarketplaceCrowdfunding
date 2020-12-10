@@ -4,4 +4,7 @@
 ## Scripts
 - Prod/Build : npm run build
 - Dev : npm run start
-- Test : npm run test
+
+## Backend truffle test
+- Run test network, as defined in truffle-config by running this command: `ganache-cli -m <mnemonic> -p 8546` 
+- truffle test --network test

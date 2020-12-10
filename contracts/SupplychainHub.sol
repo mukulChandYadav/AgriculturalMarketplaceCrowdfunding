@@ -8,12 +8,12 @@ import "./base/Ownable.sol";
 
 contract SupplychainHub is Ownable {
     enum SupplychainStage {
-        DefaultState,
-        ProductPublished, //TODO: Add funding deadline
-        ProductFunded,
-        Harvested,
-        OnSale,
-        Sold
+        DefaultState,//0
+        ProductPublished,//1 //TODO: Add funding deadline
+        ProductFunded,//2
+        Harvested,//3
+        OnSale,//4
+        Sold//5
     }
     uint256 public upc;
     mapping(uint256 => SupplychainStage) upcToSupplychainStage;

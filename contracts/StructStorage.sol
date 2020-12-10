@@ -21,6 +21,17 @@ contract StructStorage is Ownable {
 
     mapping(uint256 => product) productIdToProductMapping;
 
+    // constructor() public {
+    //     // Only for testing
+    // }
+
+    // Only for testing
+    // function setSupplychainHubInstance(
+    //     SupplychainHub _supplychainProductStateContract
+    // ) public {
+    //     supplychainProductStateContract = _supplychainProductStateContract;
+    // }
+
     constructor(SupplychainHub _supplychainProductStateContract) public {
         supplychainProductStateContract = _supplychainProductStateContract;
     }
