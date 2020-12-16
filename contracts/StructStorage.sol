@@ -196,7 +196,7 @@ contract StructStorage is Ownable {
 
     /**
      * Get balance amount of user address
-     * 
+     *
      */
     function getBalance(address addr) public view returns (uint256) {
         return addr.balance; //balances[addr];
@@ -212,7 +212,6 @@ contract StructStorage is Ownable {
         uint256 expectedPrice,
         uint256 requiredFunding
     ) public returns (bool) {
-        //SupplychainHub scHub = SupplychainHub(supplychainProductStateContract);
         uint256 currentUPC = supplychainProductStateContract.upc();
         StructStorage.product memory fnew = product(
             currentUPC,
@@ -225,6 +224,10 @@ contract StructStorage is Ownable {
         );
         productIdToProductMapping[currentUPC] = fnew;
         require(supplychainProductStateContract.incrementProductCodeCounter());
+        supplychainProductStateContract.updateSupplychainStatus(
+            currentUPC,
+            SupplychainHub.SupplychainStage.ProductPublished
+        );
         return true;
     }
 

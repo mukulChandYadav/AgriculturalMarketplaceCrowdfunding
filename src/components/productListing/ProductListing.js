@@ -62,7 +62,7 @@ class ProductListing extends Component {
 
             { name: 'universalProductCode', displayName: "Universal Product Code", inputFilterable: true, exactFilterable: true, sortable: true },
             { name: 'cropName', displayName: "Crop Name", inputFilterable: true, sortable: true },
-            { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.productFundingPageLink },
+            { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.pendingActionLink },
             { name: 'userRating', displayName: "Owner Rating", render: FieldRenderer.userRating },
             { name: 'quantity', displayName: "Quantity", sortable: true },
             { name: 'expectedPrice', displayName: "Expected Price", sortable: true },
@@ -82,10 +82,12 @@ class ProductListing extends Component {
                     <br />
                     <br />
                     <div >
-                        {((this.props.userRole !== NumToUserRole['1'].toString()) || (this.state.showPublishPage ? true : false)) ? null : (<button className='btn btn-primary'
-                            onClick={this.publishNewProduct}>
-                            Publish New Product
-                        </button>)}
+                        {((this.props.userRole !== NumToUserRole['1'].toString()) || //Not farmer
+                            (this.state.showPublishPage ? true : false)) ? null :
+                            (<button className='btn btn-primary'
+                                onClick={this.publishNewProduct}>
+                                Publish New Product
+                            </button>)}
                         <br />
                         <br />
                     </div>
