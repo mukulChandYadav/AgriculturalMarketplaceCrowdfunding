@@ -21,3 +21,7 @@ truffle-config.js
 ganache-cli -m "drama repeat eagle about favorite garbage battle balance slight catalog surround visual" --allowUnlimitedContractSize  --gasLimit 0xFFFFFFFFFFFF
 
 
+const networkId = await web3.eth.net.getId(); // Get network ID
+const chainId = await web3.eth.getChainId(); // Get chain ID
+
+Mnemonic:      loop spirit cool glare simple cram leopard brass tree try thumb obtain

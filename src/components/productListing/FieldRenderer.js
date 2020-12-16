@@ -1,11 +1,13 @@
 import React from 'react';
+import { UserRoleToNum } from '../Constants';
+import ReactStars from "react-rating-stars-component";
 
 //import { NumToUserRole } from '../Constants';
 // https://www.npmjs.com/package/react-filterable-table
 // https://github.com/ianwitherow/react-filterable-table/blob/master/example-alt/js/FieldRenders.js
 export default {
     productFundingPageLink: function (props) {
-        //;
+
         let fields = props.fields;
         console.log("props");
         console.log(props);
@@ -15,41 +17,67 @@ export default {
         console.log(fields.props);
         let fundProduct = fields[fields.length - 1].props.fundProduct;
         const userRole = fields[fields.length - 1].props.userRole;
-        const productContractAddress = props.record.productContractAddress;
-        console.log("In renderer")
-        
+        // const productContractAddress = props.record.productContractAddress;
+        const productID = props.record.universalProductCode;
+        //const senderAccount = fields[fields.length - 1].props.account;
+        const receiverAccount = props.record.ownerAccount;
+        console.log("In renderer", "Role", userRole)
 
         var enableCrowdFundFeature = false;
 
-        if ((userRole !== 'Farmer') && (props.record.fundingStage === '0')) { //is not Farmer and fundingStage open
+        if ((userRole !== 'Farmer') && (parseInt(props.record.requiredFunding) !== 0)) {
+            //is not Farmer and fundingStage open
             //Enable crowd fund feature
             enableCrowdFundFeature = true;
         }
 
-        console.log("Should Enable crowd fund contribution:"+enableCrowdFundFeature);
+        console.log("Should Enable crowd fund contribution:" + enableCrowdFundFeature);
 
         return (
             <span>
                 {enableCrowdFundFeature ? (<form onSubmit={(event) => {
                     event.preventDefault();
                     console.log("on submit", this.inputNode.value, event);
-                    fundProduct(productContractAddress, event.target.elements[0].value);
+                    const contributionAmount = event.target.elements[0].value;
+                    fundProduct(receiverAccount, contributionAmount, UserRoleToNum[userRole], productID);
                 }}>
 
                     <input
-                        id={"amount" + props.record.upc}
+                        id={"amount" + props.record.universalProductCode}
                         type='text'
                         ref={(input) => { this.inputNode = input }}
                         className='form-control'
-                        placeholder='Contribute funds (in Wei)'
+                        placeholder='Amount (in Wei)'
                         required />
                     <br />
 
                     {/* <button onClick={(event) => { fundCompLoader(props.record.upc) }}>Deposit Fund</button> */}
-                    <button type='submit' className='btn btn-primary'>Deposit Fund</button>
-                </form>) : null}
+                    <button type='submit' variant="primary" className='btn btn-primary' size="sm">Contribute</button>
+                </form>) : (parseInt(props.record.requiredFunding) === 0) ? (<button disabled className='btn btn-success'>Funded</button>) : null}
 
             </span>
         );
+    },
+    userRating: function (props) {
+
+        const val = getVal();
+        function ratingChanged() {
+
+        }
+        function getVal() {
+            return (Math.random() * Math.floor(6));
+        }
+        return (
+        <ReactStars
+            count={5}
+            onChange={ratingChanged}
+            value={val}
+            size={15}
+            isHalf={true}
+            emptyIcon={<i className="far fa-star"></i>}
+            halfIcon={<i className="fa fa-star-half-alt"></i>}
+            fullIcon={<i className="fa fa-star"></i>}
+            activeColor="#ffd700"
+        />);
     }
 }

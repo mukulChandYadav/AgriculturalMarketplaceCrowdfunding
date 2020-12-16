@@ -1,9 +1,5 @@
-
-
 import React, { Component } from 'react';
 
-
-import SignUp from './SignUp';
 import ProductListing from './productListing/ProductListing';
 import Register from './Register';
 import PublishProductForm from './productListing/PublishProductForm';
@@ -14,10 +10,6 @@ import {
 import RouteWithSubRoutes from './RouteWithSubRoutes';
 
 const routes = [
-    {
-        path: "/signUp",
-        component: SignUp
-    },
     {
         path: "/register",
         component: Register,

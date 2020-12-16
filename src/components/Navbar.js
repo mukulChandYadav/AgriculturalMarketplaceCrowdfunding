@@ -14,17 +14,22 @@ class Navbar extends Component {
           rel="noopener noreferrer"
         >
           <img src={logo} width="30" height="30" className="align-top" alt="" />
-          &nbsp;Crowdfunded Agriculture Marketplace
+          Crowdfunded Agriculture Marketplace
         </a>
         <ul className="navbar-nav px-3">
           <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
             <small className="text-secondary">
-              <strong id="UserName">{this.props.userName}</strong>
-            </small>
-          </li>
-          <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-            <small className="text-secondary">
-              <small id="UserRole">{this.props.userRole}</small>
+              <ul>
+                {(this.props.userName !== undefined) ? (<li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <strong id="UserName" className="text-secondary"> {'Name:' + this.props.userName}</strong>
+                </li>) : null}
+                {(this.props.userRole !== undefined) ? (<li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <small id="UserRole" className="text-secondary">{'User Role:' + this.props.userRole}</small>
+                </li>) : null}
+                {(this.props.userBalance !== undefined) ? <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
+                  <small id="Balance" className="text-secondary">{'Balance:' + this.props.userBalance}</small>
+                </li> : null}
+              </ul>
             </small>
           </li>
         </ul>

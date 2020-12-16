@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 //import {Link} from 'react-router-dom';
 import { UserRoleToNum, NumToUserRole, /*FundingStage*/ } from '../Constants';
 import PublishProductForm from './PublishProductForm';
-
 import FieldRenderer from './FieldRenderer';
 
 
@@ -21,9 +20,6 @@ class ProductListing extends Component {
             dataReady: false,
             tableData: []
         }
-
-        //props.getPublishedProductDetails=props.getPublishedProductDetails.bind(this);
-        //this.PublishButton = this.PublishButton.bind(this);
 
     }
 
@@ -58,60 +54,54 @@ class ProductListing extends Component {
 
     }
 
-    // fundProduct(upc) {
-    //     this.setState({
-    //         loadFundProduct: true,
-    //         fundedProduct: upc
-    //     });
-    // }
-
     render() {
 
         console.log("Is farmer:", this.props.userRole === NumToUserRole['1'].toString());
 
         let fields = [
 
-            { name: 'productFundingPageLink', displayName: "Product Details", render: FieldRenderer.productFundingPageLink },
-            { name: 'upc', displayName: "Universal Product code", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'sku', displayName: "Stock Keeping Units", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'productSupplyChainState', displayName: "Product Supplychain State", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'fundingStage', displayName: "Crowd funding product Stage", inputFilterable: true, sortable: true },
-            { name: 'fundingCap', displayName: "Crowd funding cap", inputFilterable: true, sortable: true },
-            { name: 'deadline', displayName: "Crowdfunding deadline", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'creationTime', displayName: "Product publish time", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'ownerID', displayName: "Owner Account ID", inputFilterable: true, sortable: true },
-            { name: 'originFarmerID', displayName: "Origin Farmer ID", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'originFarmName', displayName: "Origin Farm Name", inputFilterable: true, sortable: true },
-            { name: 'productNotes', displayName: "Product Notes", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'beneficiary', displayName: "Crowd funding beneficiary", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'productContractAddress', displayName: "Product Contract Address", inputFilterable: true, sortable: true },
+            { name: 'universalProductCode', displayName: "Universal Product Code", inputFilterable: true, exactFilterable: true, sortable: true },
+            { name: 'cropName', displayName: "Crop Name", inputFilterable: true, sortable: true },
+            { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.productFundingPageLink },
+            { name: 'userRating', displayName: "Owner Rating", render: FieldRenderer.userRating },
+            { name: 'quantity', displayName: "Quantity", sortable: true },
+            { name: 'expectedPrice', displayName: "Expected Price", sortable: true },
+            { name: 'requiredFunding', displayName: "Required Funding", sortable: true },
+            { name: 'availableFunding', displayName: "Available Funding", sortable: true },
+            { name: 'supplyChainStage', displayName: "Supplychain Stage", sortable: true },
+            { name: 'ownerName', displayName: "Owner Name", sortable: true, inputFilterable: true, exactFilterable: true },
+            { name: 'ownerAccount', displayName: "Owner Account", inputFilterable: true },
             { name: 'props', props: this.props },
         ];
+
+
 
         return (
             <div>
                 <div>
-                    <div>
-                        <button
-                            hidden={(this.props.userRole !== NumToUserRole['1'].toString()) || this.state.showPublishPage ? true : false}
+                    <br />
+                    <br />
+                    <div >
+                        {((this.props.userRole !== NumToUserRole['1'].toString()) || (this.state.showPublishPage ? true : false)) ? null : (<button className='btn btn-primary'
                             onClick={this.publishNewProduct}>
                             Publish New Product
-                        </button>
+                        </button>)}
+                        <br />
                         <br />
                     </div>
                     {
-                        this.state.showPublishPage ? <PublishProductForm account={this.props.accounts} {...this.state} {...this.props} /> : null
+                        this.state.showPublishPage ? <div><PublishProductForm account={this.props.accounts} {...this.state} {...this.props} /></div> : null
                     }{
 
                         this.state.dataReady ?
-                            (<FilterableTable
+                            (<div><FilterableTable
                                 namespace="People"
                                 initialSort="name"
                                 data={this.state.tableData}
                                 fields={fields}
-                                roRecordsMessage="There are no people to display"
-                                noFilteredRecordsMessage="No people match your filters!"
-                            />) : null
+                                roRecordsMessage="There are no products to display"
+                                noFilteredRecordsMessage="No product match your filters!"
+                            /></div>) : null
                     }
                 </div>
             </div>

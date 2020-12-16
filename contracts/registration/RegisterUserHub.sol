@@ -7,15 +7,17 @@ import "./ACLs/ConsumerRole.sol";
 import "./ACLs/ForwardMarketConsumerRole.sol";
 import "./ACLs/SpotMarketConsumerRole.sol";
 import "./ACLs/InvestorRole.sol";
+import "../base/Ownable.sol";
 
-// TODO: Implement better design pattern to encapsulate all user roles
+// Interface to perform controller function for user management
 abstract contract RegisterUserHub is
     FarmerRole,
     DonorRole,
     ConsumerRole,
     ForwardMarketConsumerRole,
     SpotMarketConsumerRole,
-    InvestorRole
+    InvestorRole,
+    Ownable
 {
     //Registered users to role mapping
     mapping(address => UserRoleType) registeredUsers;

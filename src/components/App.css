@@ -1,1 +1,8 @@
 /* Styles go here */
+:root{
+    --nav-color:#FA4616;
+}
+
+.UF-Orange{
+    color: var(--nav-color)
+}
