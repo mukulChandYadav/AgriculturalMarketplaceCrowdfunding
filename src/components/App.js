@@ -80,7 +80,7 @@ class App extends Component {
       });
     };
     let machineRef = SCFSM.withContext({ //useRef
-      context,
+      ...context,
       notify, // passing side effect command to fsm
     });
     console.log('Machine return val ', machineRef);
@@ -376,13 +376,13 @@ class App extends Component {
         }
 
         if (debug === true) {
-          console.group(`%c[useMachine ${name}]`, 'color: darkblue')
-          this.dumpState(state.value)
-          //dumpState(state.context)
-          this.dumpState(state.event)
-          console.log('ctx=', state.context)
-          console.log('evt=', state.event)
-          console.log('\n',)
+          console.group(`%c[useMachine ${name}]`, 'color: darkblue');
+          this.dumpState(state.value);
+          //this.dumpState(state.context);
+          this.dumpState(state.event);
+          console.log('ctx=', state.context);
+          console.log('evt=', state.event);
+          console.log('\n',);
           console.groupEnd();
         }
 

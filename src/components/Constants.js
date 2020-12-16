@@ -25,6 +25,15 @@ export const OrdinalToSupplyChainStatus = {
     '5': 'Sold'
 };
 
+export const SupplyChainStatusToOrdinal = {
+    'Default State': '0',
+    'Product Published': '1',
+    'Product Funded': '2',
+    'Harvested': '3',
+    'On Sale': '4',
+    'Sold': '5'
+};
+
 export const FundingStage = {
     Open: 0,
     FundingRaised: 1,

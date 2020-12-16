@@ -23,7 +23,7 @@ export default {
         // const productContractAddress = props.record.productContractAddress;
         const productID = props.record.universalProductCode;
         const senderAccount = fields[fields.length - 1].props.account;
-        //const receiverAccount = props.record.ownerAccount;
+        const receiverAccount = props.record.ownerAccount;
         console.log("In renderer", "Role", userRole)
         console.log("Props", fields[fields.length - 1].props);
         var enableCrowdFundFeature = false;
@@ -49,7 +49,8 @@ export default {
                         payload:{
                             userRoleType:UserRoleToNum[userRole],
                             sender:senderAccount,
-                            contributionAmount:contributionAmount
+                            contributionAmount:contributionAmount,
+                            receiverAccount:receiverAccount
                         }
                     };
                     scfsm.send(scFSMEvent);
