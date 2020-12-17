@@ -10,31 +10,32 @@ This document uses UML to describre the general structure and functions that thi
 - Investors
 - Donors
 - Consumers (Forward Market/Spot Market)
+- Marketplace owner
 
 # Activity Diagram
 
 This diagram shows the different actors and the interactions with the system.
 
-![Activity Diagram](https://github.com/mukulChandYadav/AgriculturalMarketplaceCrowdfunding/blob/AgrochainBackend/assets/images/Activity%20diagram.jpg)
+![Activity Diagram](assets/images/Activity%20diagram.jpg)
 
 
 # Sequence Diagram
 
 This diagram shows the communication between the different objects and their life cycle.
 
-![Sequence Diagram](https://github.com/mukulChandYadav/AgriculturalMarketplaceCrowdfunding/blob/AgrochainBackend/assets/images/Sequence%20Diagram.jpg)
+![Sequence Diagram](assets/images/Sequence%20Diagram.jpg)
 
 # State Diagram
 
 This diagram shows the different states of each object and the events or conditions that change those states.
 
-![State Diagram](https://github.com/mukulChandYadav/AgriculturalMarketplaceCrowdfunding/blob/AgrochainBackend/assets/images/State%20Diagram.jpg)
+![State Diagram](assets/images/State%20Diagram.jpg)
 
 # Data Modeling Diagram
 
 This diagram shows the different Smart Contracts and the relation between them
 
-![Data Modeling Diagram](https://github.com/mukulChandYadav/AgriculturalMarketplaceCrowdfunding/blob/AgrochainBackend/assets/images/Class%20Diagram.jpg)
+![Data Modeling Diagram](assets/images/Class%20Diagram.jpg)
 
 
 ## Getting Started

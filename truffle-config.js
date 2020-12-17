@@ -53,7 +53,7 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
     },
     test: {
-      host: "127.0.0.1",
+      host: "host.docker.internal",//"127.0.0.1",
       port: 8546,
       network_id: "*"
     },
