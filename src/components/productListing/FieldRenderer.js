@@ -133,6 +133,9 @@ export default {
 
 
                 break;
+            default:
+                console.error("Product in unknown fsm stage");
+                break;
         }
 
         return (
