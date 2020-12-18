@@ -12,9 +12,9 @@ class Navbar extends Component {
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-        >
-          <img src={logo} width="30" height="30" className="align-top" alt="" />
-          Crowdfunded Agriculture Marketplace
+        ><ul><img src={logo} width="30" height="30" className="align-top" alt="" />
+          &nbsp;Crowdfunded Agriculture Marketplace</ul>
+
         </a>
         <ul className="navbar-nav px-3">
           <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">

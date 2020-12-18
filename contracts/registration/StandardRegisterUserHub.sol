@@ -2,8 +2,11 @@
 pragma solidity >=0.4.22 <0.8.0;
 
 import "./RegisterUserHub.sol";
+
 // Implementation for RegisterUserHub abstract class
 contract StandardRegisterUserHub is RegisterUserHub {
+    constructor() public Ownable() {}
+
     modifier notRegistered() {
         require(registeredUsers[msg.sender] == UserRoleType.DefaultPlaceholder);
         _;
@@ -15,46 +18,63 @@ contract StandardRegisterUserHub is RegisterUserHub {
     }
 
     //Add account to common registry
-    function registerUser(string memory userName, uint256 userRoleType)
-        public
-        override
-        notRegistered
-        returns (bool)
-    {
+    function registerUserInternal(
+        string memory userName,
+        uint256 userRoleType,
+        address payable account
+    ) public returns (bool) {
         bool retVal = false;
+
         if (userRoleType == 1) {
-            registeredUsers[msg.sender] = UserRoleType.Farmer;
-            addFarmer(msg.sender);
+            registeredUsers[account] = UserRoleType.Farmer;
+            addFarmer(account);
             retVal = true;
         } else {
             if (userRoleType == 2) {
-                registeredUsers[msg.sender] = UserRoleType.Donor;
-                addDonor(msg.sender);
+                registeredUsers[account] = UserRoleType.Donor;
+                addDonor(account);
                 retVal = true;
             } else {
                 if (userRoleType == 3) {
-                    registeredUsers[msg.sender] = UserRoleType.Investor;
-                    addInvestor(msg.sender);
+                    registeredUsers[account] = UserRoleType.Investor;
+                    addInvestor(account);
                     retVal = true;
                 } else {
                     if (userRoleType == 4) {
-                        registeredUsers[msg.sender] = UserRoleType
+                        registeredUsers[account] = UserRoleType
                             .ForwardMarketConsumer;
-                        addForwardMarketConsumer(msg.sender);
+                        addForwardMarketConsumer(account);
                         retVal = true;
                     } else {
                         if (userRoleType == 5) {
-                            registeredUsers[msg.sender] = UserRoleType
+                            registeredUsers[account] = UserRoleType
                                 .SportMarketConsumer;
-                            addSpotMarketConsumer(msg.sender);
+                            addSpotMarketConsumer(account);
                             retVal = true;
+                        } else {
+                            if (userRoleType == 6) {
+                                registeredUsers[account] = UserRoleType
+                                    .MarketplaceManager;
+                                addMarketplaceManager(account);
+                                retVal = true;
+                            }
                         }
                     }
                 }
             }
         }
-        userNames[msg.sender] = userName;
+        userNames[account] = userName;
         return retVal;
+    }
+
+    //Add account to common registry
+    function registerUser(string calldata userName, uint256 userRoleType)
+        external
+        override
+        notRegistered
+        returns (bool)
+    {
+        return registerUserInternal(userName, userRoleType, msg.sender);
     }
 
     //Check if account has registered
@@ -88,8 +108,10 @@ contract StandardRegisterUserHub is RegisterUserHub {
     function getUserNameOf(address accountAddress)
         public
         view
-        //hasRegistered
-        returns (string memory)
+        returns (
+            //hasRegistered
+            string memory
+        )
     {
         return userNames[accountAddress];
     }

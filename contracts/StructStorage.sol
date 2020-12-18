@@ -30,9 +30,13 @@ contract StructStorage is Ownable {
     ) public Ownable() {
         supplychainProductStateContract = _supplychainProductStateContract;
         standardRegisterUserHubContract = _standardRegisterUserHubContract;
-        _standardRegisterUserHubContract.registerUser(
-            "Crowdfunded Agriculture Marketplace Manager",
-            6 //StandardRegisterUserHub.UserRoleType.MarketplaceManager
+        require(
+            _standardRegisterUserHubContract.registerUserInternal(
+                "Crowdfunded Agriculture Marketplace Manager",
+                6, //StandardRegisterUserHub.UserRoleType.MarketplaceManager
+                msg.sender // Sent as argument as it gets overridden by this contract address in upper call stack
+            ),
+            "Failed to register deploying account in Marketplace manager role"
         );
     }
 

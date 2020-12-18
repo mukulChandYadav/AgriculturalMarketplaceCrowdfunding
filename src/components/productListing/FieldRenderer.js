@@ -22,8 +22,8 @@ export default {
         const scfsmList = fields[fields.length - 1].props.productSCServicesIndexedByID
         // const productContractAddress = props.record.productContractAddress;
         const productID = props.record.universalProductCode;
-        const senderAccount = fields[fields.length - 1].props.account;
-        const receiverAccount = props.record.ownerAccount;
+        const activeUserAccount = fields[fields.length - 1].props.account;
+        const productCurrentOwnerAccount = props.record.ownerAccount;
         const availableFunding = props.record.availableFunding;
         const expectedPrice = props.record.expectedPrice;
         console.log("In renderer", "Role", userRole)
@@ -33,25 +33,30 @@ export default {
         var nextActionButtonValue = '';
         var isInputDisabled = true;
         var buttonDisabled = true;
-
+        var submitButtonVariant = 'btn btn-secondary';
+        var toolTipPendingActionText = "Pending action for Product Owner";
 
         var formSubmitAction;
         switch (scfsmState) {
             case 'sold':
                 nextActionButtonValue = 'Sold';
                 buttonDisabled = 'true';
+                submitButtonVariant = 'btn btn-success';
+                toolTipPendingActionText = 'Product delivered to Customer';
                 break;
             case 'onSale':
                 nextActionButtonValue = 'Buy';
                 isInputDisabled = true;
+                toolTipPendingActionText = 'Waiting for Customer';
                 if (userRole === 'Spot Market Consumer') {
                     buttonDisabled = '';
+                    submitButtonVariant = 'btn btn-primary';
                     formSubmitAction = function (event) {
                         event.preventDefault();
                         let scFSMEvent = {
                             type: 'SALE_TO_CUSTOMER',
                             payload: {
-                                sender: senderAccount,
+                                sender: activeUserAccount,
                                 expectedPrice: expectedPrice,
                             }
                         };
@@ -61,20 +66,23 @@ export default {
 
                 } else {
                     buttonDisabled = true;
+                    submitButtonVariant = 'btn btn-secondary';
                 }
 
                 break;
             case 'harvested':
                 nextActionButtonValue = 'Transfer To Marketplace';
                 isInputDisabled = true;
-                if (userRole === 'Farmer') {
+                toolTipPendingActionText = "Waiting for Marketplace Manager's approval";
+                if ((userRole === 'Marketplace Manager')) {
                     buttonDisabled = '';
+                    submitButtonVariant = 'btn btn-primary';
                     formSubmitAction = function (event) {
                         event.preventDefault();
                         let scFSMEvent = {
                             type: 'PUT_ON_SALE',
                             payload: {
-                                sender: senderAccount,
+                                sender: activeUserAccount,
                                 expectedPrice: expectedPrice,
                             }
                         };
@@ -84,37 +92,42 @@ export default {
 
                 } else {
                     buttonDisabled = true;
+                    submitButtonVariant = 'btn btn-secondary';
                 }
 
                 break;
             case 'funded':
                 nextActionButtonValue = 'Harvest';
                 isInputDisabled = true;
-                if (userRole === 'Farmer') {
+                toolTipPendingActionText = "Waiting for farmer to harvest product";
+                if ((userRole === 'Farmer') && (activeUserAccount === productCurrentOwnerAccount)) {
                     buttonDisabled = '';
+                    submitButtonVariant = 'btn btn-primary';
                     formSubmitAction = function (event) {
                         event.preventDefault();
                         let scFSMEvent = {
                             type: 'PRODUCT_HARVEST',
                             payload: {
-                                sender: senderAccount,
+                                sender: activeUserAccount,
                                 availableFunds: availableFunding,
                             }
                         };
                         console.log('Invoked FSM', scfsm, 'with event', scFSMEvent);
                         scfsm.send(scFSMEvent);
                     }
-
                 } else {
                     buttonDisabled = true;
+                    submitButtonVariant = 'btn btn-secondary';
                 }
 
                 break;
             case 'productPublished':
                 nextActionButtonValue = 'Contribute';
+                toolTipPendingActionText = "Waiting for funding by Investors, Donors & Forward Market Consumer";
                 if (userRole === 'Investor' || userRole === 'Donor') {
                     isInputDisabled = '';
                     buttonDisabled = '';
+                    submitButtonVariant = 'btn btn-primary';
                     formSubmitAction = function (event) {
                         event.preventDefault();
                         const contributionAmount = event.target.elements[0].value;
@@ -122,13 +135,16 @@ export default {
                             type: 'FUND',
                             payload: {
                                 userRoleType: UserRoleToNum[userRole],
-                                sender: senderAccount,
+                                sender: activeUserAccount,
                                 contributionAmount: contributionAmount,
-                                receiverAccount: receiverAccount
+                                receiverAccount: productCurrentOwnerAccount
                             }
                         };
                         scfsm.send(scFSMEvent);
                     }
+                } else {
+                    buttonDisabled = true;
+                    submitButtonVariant = 'btn btn-secondary';
                 }
 
 
@@ -152,7 +168,7 @@ export default {
                         placeholder='Amount (in Wei)'
                         required />
                     <br />
-                    <button type='submit' disabled={buttonDisabled} variant="primary" className='btn btn-primary' size="sm" >{nextActionButtonValue}</button>
+                    <button type='submit' title={toolTipPendingActionText} disabled={buttonDisabled} className={submitButtonVariant} size="sm" >{nextActionButtonValue}</button>
                 </form>
             </span>
         );

@@ -34,8 +34,8 @@ abstract contract RegisterUserHub is
     }
 
     //Add account to common registry
-    function registerUser(string memory userName, uint256 userRoleType)
-        public
+    function registerUser(string calldata userName, uint256 userRoleType)
+        external
         virtual
         returns (bool);
 
