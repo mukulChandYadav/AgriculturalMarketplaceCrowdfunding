@@ -3,7 +3,7 @@ pragma solidity >=0.4.22 <0.8.0;
 
 import "./ACLs/FarmerRole.sol";
 import "./ACLs/DonorRole.sol";
-import "./ACLs/ConsumerRole.sol";
+import "./ACLs/MarketplaceManagerRole.sol";
 import "./ACLs/ForwardMarketConsumerRole.sol";
 import "./ACLs/SpotMarketConsumerRole.sol";
 import "./ACLs/InvestorRole.sol";
@@ -13,7 +13,7 @@ import "../base/Ownable.sol";
 abstract contract RegisterUserHub is
     FarmerRole,
     DonorRole,
-    ConsumerRole,
+    MarketplaceManagerRole,
     ForwardMarketConsumerRole,
     SpotMarketConsumerRole,
     InvestorRole,
@@ -29,7 +29,8 @@ abstract contract RegisterUserHub is
         Donor,
         Investor,
         ForwardMarketConsumer,
-        SportMarketConsumer
+        SportMarketConsumer,
+        MarketplaceManager
     }
 
     //Add account to common registry

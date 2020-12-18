@@ -3,12 +3,14 @@ pragma solidity >=0.4.22 <0.8.0;
 //pragma experimental ABIEncoderV2;
 
 //pragma solidity ^0.5.0;
-import "./SupplychainHub.sol";
 import "./base/Ownable.sol";
+import "./SupplychainHub.sol";
+import "./registration/StandardRegisterUserHub.sol";
 
 // Controller contract for product interaction & workflow
 contract StructStorage is Ownable {
     SupplychainHub supplychainProductStateContract;
+    StandardRegisterUserHub standardRegisterUserHubContract;
 
     struct product {
         uint256 universalProductCode;
@@ -22,8 +24,16 @@ contract StructStorage is Ownable {
 
     mapping(uint256 => product) productIdToProductMapping;
 
-    constructor(SupplychainHub _supplychainProductStateContract) public {
+    constructor(
+        SupplychainHub _supplychainProductStateContract,
+        StandardRegisterUserHub _standardRegisterUserHubContract
+    ) public Ownable() {
         supplychainProductStateContract = _supplychainProductStateContract;
+        standardRegisterUserHubContract = _standardRegisterUserHubContract;
+        _standardRegisterUserHubContract.registerUser(
+            "Crowdfunded Agriculture Marketplace Manager",
+            6 //StandardRegisterUserHub.UserRoleType.MarketplaceManager
+        );
     }
 
     /**
@@ -107,14 +117,19 @@ contract StructStorage is Ownable {
                 SupplychainHub.SupplychainStage.ProductFunded
         );
 
-        product memory p = productIdToProductMapping[_upc];
-        // Sell to Supply chain hub
-        address payable buyer = supplychainProductStateContract.getOwner();
-        //Change ownership to market place
-        p.ownerAccount = buyer;
+        product storage p = productIdToProductMapping[_upc];
+        // Transfer obtained funds to market place to perform settlement later
+        address payable marketplaceOwner = supplychainProductStateContract
+            .getOwner();
+
+        // Ensure sent value is more than available funding
+        // TODO: Implement payment channel contract between parties
+        require(msg.value >= p.availableFunding);
 
         // Transfer crowd funded amount to market owner
-        require(buyer.send(p.availableFunding));
+        require(marketplaceOwner.send(p.availableFunding));
+        //Return change to sender
+        require(msg.sender.send(msg.value - p.availableFunding));
 
         require(
             supplychainProductStateContract.updateSupplychainStatus(
@@ -122,46 +137,64 @@ contract StructStorage is Ownable {
                 SupplychainHub.SupplychainStage.Harvested
             )
         );
+
         return true;
     }
 
     /**
      * Move product to market place and pay out investors
      * Supplychain hub makes the purchase
+     * Read: https://docs.soliditylang.org/en/v0.6.0/common-patterns.html?highlight=transfer#withdrawal-from-contracts
      */
     function markProductForSale(uint256 _upc) public payable returns (bool) {
         require(
             supplychainProductStateContract.getSupplychainStatus(_upc) ==
                 SupplychainHub.SupplychainStage.Harvested
         );
-        product memory p = productIdToProductMapping[_upc];
+        product storage p = productIdToProductMapping[_upc];
 
         // Sell to Supply chain hub
-        address payable buyer = supplychainProductStateContract.getOwner();
-        require(msg.sender == buyer); // Supplychain hub makes the purchase
+        address payable marketplaceOwner = supplychainProductStateContract
+            .getOwner();
+
+        require(msg.sender == marketplaceOwner); // Supplychain hub makes owner transfer & pays farmer expected price
+        require(msg.value >= p.expectedPrice);
+
         // Farmers(owner) receive expected price
         address payable seller = p.ownerAccount;
         require(seller.send(p.expectedPrice));
 
-        // Investors paid out by market place,i.e. current owner of product
-        address[] memory investors = supplychainProductStateContract
-            .getListOfPayblesForProduct(_upc);
-        for (uint8 i = 0; i < investors.length; ++i) {
-            uint256 amount = supplychainProductStateContract
-                .getPaybleOwedAmountForProduct(_upc, investors[i]);
-            require(payable(investors[i]).send(amount));
-            require(
-                supplychainProductStateContract.markFundsReleasedToContributor(
-                    _upc,
-                    payable(investors[i])
-                )
-            );
-        }
+        //Change ownership to market place
+        p.ownerAccount = marketplaceOwner;
 
         require(
             supplychainProductStateContract.updateSupplychainStatus(
                 _upc,
                 SupplychainHub.SupplychainStage.OnSale
+            )
+        );
+        return true;
+    }
+
+    /**
+     *  Receive Payout from Marketplace by investor
+     *
+     */
+    function sendMarketplacePayoutToInvestor(
+        uint256 _upc,
+        address payable investor
+    ) public payable returns (bool) {
+        uint256 payoutAmount = supplychainProductStateContract
+            .getPayoutAmountForContributor(_upc, investor);
+        require(
+            msg.value >= payoutAmount,
+            "Sent amount less than total payout amount"
+        );
+        require(investor.send(payoutAmount));
+        require(
+            supplychainProductStateContract.markFundsReleasedToContributor(
+                _upc,
+                investor
             )
         );
         return true;
@@ -177,8 +210,8 @@ contract StructStorage is Ownable {
                 SupplychainHub.SupplychainStage.OnSale
         );
 
-        product memory p = productIdToProductMapping[_upc];
-        require(msg.value > p.expectedPrice);
+        product storage p = productIdToProductMapping[_upc];
+        require(msg.value >= p.expectedPrice);
         // Supply chain hub paid
         address payable marketOwner = p.ownerAccount;
         require(marketOwner.send(msg.value));
@@ -196,7 +229,7 @@ contract StructStorage is Ownable {
 
     /**
      * Get balance amount of user address
-     * 
+     *
      */
     function getBalance(address addr) public view returns (uint256) {
         return addr.balance; //balances[addr];
@@ -212,7 +245,6 @@ contract StructStorage is Ownable {
         uint256 expectedPrice,
         uint256 requiredFunding
     ) public returns (bool) {
-        //SupplychainHub scHub = SupplychainHub(supplychainProductStateContract);
         uint256 currentUPC = supplychainProductStateContract.upc();
         StructStorage.product memory fnew = product(
             currentUPC,
@@ -225,6 +257,10 @@ contract StructStorage is Ownable {
         );
         productIdToProductMapping[currentUPC] = fnew;
         require(supplychainProductStateContract.incrementProductCodeCounter());
+        supplychainProductStateContract.updateSupplychainStatus(
+            currentUPC,
+            SupplychainHub.SupplychainStage.ProductPublished
+        );
         return true;
     }
 
@@ -256,4 +292,54 @@ contract StructStorage is Ownable {
             productIdToProductMapping[universalProductCode].ownerAccount
         );
     }
+
+    /**
+     * Get payout amount for given contributor to given product
+     *
+     */
+    function getPayoutAmountForContributorToAProduct(
+        uint256 _upc,
+        address payable contributor
+    ) external view returns (uint256) {
+        require(_upc > 0);
+        require(contributor != address(0));
+        return
+            supplychainProductStateContract.getPayoutAmountForContributor(
+                _upc,
+                contributor
+            );
+    }
+
+    /**
+     * Get list of contributors for given product
+     *
+     */
+    function getContributorListForAProduct(uint256 _upc)
+        external
+        view
+        returns (address[] memory)
+    {
+        require(_upc > 0);
+        return supplychainProductStateContract.getListOfPayblesForProduct(_upc);
+    }
+    // event Received(address, uint256);
+
+    // receive() external payable {
+    //     emit Received(msg.sender, msg.value);
+    // }
+
+    // // Investors paid out by market place,i.e. current owner of product
+    // address[] memory investors = supplychainProductStateContract
+    //     .getListOfPayblesForProduct(_upc);
+    // for (uint8 i = 0; i < investors.length; ++i) {
+    //     uint256 amount = supplychainProductStateContract
+    //         .getPaybleOwedAmountForProduct(_upc, investors[i]);
+    //     //require((payable(investors[i])).send(amount));
+    //     require(
+    //         supplychainProductStateContract.markFundsReleasedToContributor(
+    //             _upc,
+    //             payable(investors[i])
+    //         )
+    //     );
+    // }
 }

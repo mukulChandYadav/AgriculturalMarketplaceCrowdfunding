@@ -17,13 +17,25 @@ contract SupplychainHub is Ownable {
         Sold //5
     }
     uint256 public upc;
+    //address payable public owner;
     mapping(uint256 => SupplychainStage) upcToSupplychainStage;
     mapping(address => mapping(uint256 => uint256)) payablesToProductIdToAmount;
     mapping(uint256 => address[]) payablesForProductIDLUT;
     mapping(uint256 => mapping(address => bool)) payablesForProductIDFlagged;
 
-    constructor() public {
+    constructor() public Ownable() {
         upc = 1;
+        //owner=msg.sender;
+    }
+
+    /**
+     *  Return payout amount owed to investor for a particular harvested product
+     */
+    function getPayoutAmountForContributor(
+        uint256 _universalProductCode,
+        address payable contributor
+    ) public view returns (uint256) {
+        return payablesToProductIdToAmount[contributor][_universalProductCode];
     }
 
     /**
@@ -56,7 +68,7 @@ contract SupplychainHub is Ownable {
 
     /**
      * Get total amount for product owed to investors
-     * 
+     *
      */
     function getPaybleOwedAmountForProduct(
         uint256 _universalProductCode,
@@ -67,7 +79,7 @@ contract SupplychainHub is Ownable {
 
     /**
      * Get list of investors for product
-     * 
+     *
      */
     function getListOfPayblesForProduct(uint256 _universalProductCode)
         public
