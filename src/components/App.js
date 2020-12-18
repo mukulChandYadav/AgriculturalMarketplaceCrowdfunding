@@ -407,8 +407,6 @@ class App extends Component {
     return { 'id': machine.id, 'state': serviceRef.state, 'send': serviceRef.send, 'ref': serviceRef };
   }
 
-
-
   // dump state tree in string format
   dumpState(item, depth = 1) {
     // if (depth == 1) console.log('\n')
@@ -429,9 +427,6 @@ class App extends Component {
       console.groupEnd()
     }
   }
-
-
-
 
   renderContent() {
     if (this.state.loading) {

@@ -1,7 +1,4 @@
 import { assign } from "xstate";
-// import Utility from '../common/Utility';
-// import StructStorage from '../artifacts/StructStorage';
-//import { transferFund1 } from './services';
 
 export const fsm = {
   id: 'SupplychainFSM',
@@ -40,7 +37,7 @@ export const fsm = {
     funding: {
       invoke: {
         id: 'fundProduct',
-        src: 'transferFund',//(context, event) => transferFund(context,event),//
+        src: 'transferFund',
         onDone: [
           {
             target: 'funded',
@@ -59,7 +56,6 @@ export const fsm = {
       },
     },
     funded: {
-      //entry: 'changeProductSupplychainStateToFunded',
       on: {
         PRODUCT_HARVEST: 'harvesting',
       }
@@ -67,7 +63,7 @@ export const fsm = {
     harvesting: {
       invoke: {
         id: 'harvestProduct',
-        src: 'productHarvest',
+        src: 'harvestProduct',
         onDone: {
           target: 'harvested',
         },
@@ -75,7 +71,6 @@ export const fsm = {
       }
     },
     harvested: {
-      //entry: 'changeProductSupplychainStateToHarvested',
       on: {
         PUT_ON_SALE: 'transferringToMarketPlace'
       }
@@ -92,7 +87,6 @@ export const fsm = {
       }
     },
     onSale: {
-      //entry: 'changeProductSupplychainStateToOnSale',
       on: {
         SALE_TO_CUSTOMER: 'sellingToCustomer',
       }
@@ -108,7 +102,6 @@ export const fsm = {
       }
     },
     sold: {
-      //entry: 'changeProductSupplychainStateToSold',
       type: 'final'
     },
     rejected: {

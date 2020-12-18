@@ -48,7 +48,7 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("SCHUB deployed addr:", SupplychainHub.address);
 
-  await deployer.deploy(StructStorage, SupplychainHub.address);
+  await deployer.deploy(StructStorage, SupplychainHub.address, StandardRegisterUserHub.address);
   storage = await StructStorage.deployed();
   console.log("Struct Storage deployed addr:", StructStorage.address);
   if (network !== "test") {

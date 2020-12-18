@@ -1,6 +1,6 @@
 # Agricultural Marketplace Crowdfunding
 
-## Description
+### Description
 
 This project aims to solve the problem of publishing & tracking the full supply chain from the product funding campaign through harvest and finally being sold through a agricultural marketplace to the consumers' hands.
 
@@ -10,33 +10,38 @@ This document uses UML to describre the general structure and functions that thi
 - Investors
 - Donors
 - Consumers (Forward Market/Spot Market)
-- Marketplace owner
+- Marketplace Manager
 
-# Activity Diagram
+### Activity Diagram
 
 This diagram shows the different actors and the interactions with the system.
 
 ![Activity Diagram](assets/images/Activity%20diagram.jpg)
 
 
-# Sequence Diagram
+### Sequence Diagram
 
 This diagram shows the communication between the different objects and their life cycle.
 
 ![Sequence Diagram](assets/images/Sequence%20Diagram.jpg)
 
-# State Diagram
+### State Diagram
 
 This diagram shows the different states of each object and the events or conditions that change those states.
 
 ![State Diagram](assets/images/State%20Diagram.jpg)
 
-# Data Modeling Diagram
+### Data Modeling Diagram
 
 This diagram shows the different Smart Contracts and the relation between them
 
 ![Data Modeling Diagram](assets/images/Class%20Diagram.jpg)
 
+### DApp State Machine
+
+This visualization shows state machine that controls product stages and user interaction navigation in deterministic fashion.
+
+![JS Finite state machine Viz](assets/images/XstateViz.png)
 
 ## Getting Started
 
@@ -120,3 +125,14 @@ npm run start (Dev)
 * Ganache-cli
 * Truffle
 
+## Credits & References
+ 
+* [Solidity](https://docs.soliditylang.org/en/v0.4.24/)
+* [web3.js - Ethereum JavaScript API](https://web3js.readthedocs.io/en/v1.2.11/)
+
+* [AgroChain](https://github.com/Kerala-Blockchain-Academy/AgroChain) - Agricultural Supply Chain Dapp With Micro-Finance
+* [DApp for Coffe Suply Chain](https://github.com/axelgalicia/blockchain-supply-chain)
+* [Supply chain DApp](https://github.com/dappuniversity/supply_chain) - Dapp University supplychain POC
+* [XState](https://github.com/davidkpiano/xstate) - JavaScript State machines and statecharts for the modern web
+* [xstate-examples](https://github.com/coodoo/xstate-examples) - A series of examples showing how to model application state with statechart using xstate
+* [Finite State Machines In React JS Using xstate](https://www.skcript.com/svr/finite-state-machines-in-react-js-using-xstate/)

@@ -13,7 +13,8 @@ export const NumToUserRole = {
     '2': 'Donor',
     '3': 'Investor',
     '4': 'Forward Market Consumer',
-    '5': 'Spot Market Consumer'
+    '5': 'Spot Market Consumer',
+    '6': 'Marketplace Manager'
 };
 
 export const OrdinalToSupplyChainStatus = {

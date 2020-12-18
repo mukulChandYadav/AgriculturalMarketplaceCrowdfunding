@@ -3,12 +3,14 @@ pragma solidity >=0.4.22 <0.8.0;
 //pragma experimental ABIEncoderV2;
 
 //pragma solidity ^0.5.0;
-import "./SupplychainHub.sol";
 import "./base/Ownable.sol";
+import "./SupplychainHub.sol";
+import "./registration/StandardRegisterUserHub.sol";
 
 // Controller contract for product interaction & workflow
 contract StructStorage is Ownable {
     SupplychainHub supplychainProductStateContract;
+    StandardRegisterUserHub standardRegisterUserHubContract;
 
     struct product {
         uint256 universalProductCode;
@@ -22,8 +24,16 @@ contract StructStorage is Ownable {
 
     mapping(uint256 => product) productIdToProductMapping;
 
-    constructor(SupplychainHub _supplychainProductStateContract) public {
+    constructor(
+        SupplychainHub _supplychainProductStateContract,
+        StandardRegisterUserHub _standardRegisterUserHubContract
+    ) public Ownable() {
         supplychainProductStateContract = _supplychainProductStateContract;
+        standardRegisterUserHubContract = _standardRegisterUserHubContract;
+        _standardRegisterUserHubContract.registerUser(
+            "Crowdfunded Agriculture Marketplace Manager",
+            6 //StandardRegisterUserHub.UserRoleType.MarketplaceManager
+        );
     }
 
     /**
