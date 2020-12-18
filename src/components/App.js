@@ -1,5 +1,4 @@
-//import StandardFundingHub from '../artifacts/StandardFundingHub';
-//import FundingToken from '../artifacts/FundingToken';
+
 import SupplychainHub from '../artifacts/SupplychainHub';
 import StructStorage from '../artifacts/StructStorage';
 import StandardRegisterUserHub from '../artifacts/StandardRegisterUserHub';
@@ -7,8 +6,8 @@ import React, { Component } from 'react';
 import Navbar from './Navbar';
 import Register from './Register';
 import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
 import './App.css';
-//import Routes from './Routes.js';
 import ProductListing from './productListing/ProductListing';
 import { NumToUserRole, OrdinalToSupplyChainStatus } from './Constants';
 import Utility from '../common/Utility';
@@ -16,7 +15,6 @@ import Utility from '../common/Utility';
 import toaster from 'toasted-notes';
 import 'toasted-notes/src/styles.css';
 
-import { MainContext } from './MainContext';
 import {
   interpret,
 } from 'xstate';
@@ -54,23 +52,59 @@ class App extends Component {
 
 
   async componentDidMount() {
-    if (window.ethereum !== undefined) {
-      window.ethereum.on('accountsChanged', (accounts) => {
-        window.location.reload();
+
+    // this returns the provider, or null if it wasn't detected
+    const provider = await detectEthereumProvider();
+
+    if (provider) {
+
+      // If the provider returned by detectEthereumProvider is not the same as
+      // window.ethereum, something is overwriting it, perhaps another wallet.
+      if (provider !== window.ethereum) {
+        console.error('Do you have multiple wallets installed?');
+
+        toaster.notify('Do you have multiple wallets installed?', {
+          position: 'top-right',
+        });
+      } else {
+
+        // Access the decentralized web!
+
+        /**********************************************************/
+        /* Handle chain (network) and chainChanged (per EIP-1193) */
+        /**********************************************************/
+
+        // Normally, we would recommend the 'eth_chainId' RPC method, but it currently
+        // returns incorrectly formatted chain ID values.
+
+        window.ethereum.on('chainChanged', function (_chainId) {
+          // We recommend reloading the page, unless you must do otherwise
+          window.location.reload();
+        });
+
+
+        /***********************************************************/
+        /* Handle user accounts and accountsChanged (per EIP-1193) */
+        /***********************************************************/
+
+        // Note that this event is emitted on page load.
+        // If the array of accounts is non-empty, you're already
+        // connected.
+        window.ethereum.on('accountsChanged', function () { window.location.reload(); });
+
+
+        await this.loadBlockchainData();
+      }
+
+    } else {
+      toaster.notify('Please install MetaMask', {
+        position: 'top-right',
       });
-
-      window.ethereum.on('chainChanged', (chainId) => {
-        window.location.reload();
-      });
-
-      Utility.Web3 = await this.loadWeb3();
-      await this.loadBlockchainData();
-
-      //console.log('MainContext', this.context);
-
-
+      console.log('Please install MetaMask');
+      window.location.assign("https://metamask.io/");
     }
   }
+
 
   async createMachine(id, context) {
 
@@ -98,28 +132,21 @@ class App extends Component {
 
 
   async loadWeb3() {
-    if (typeof window.ethereum !== undefined) {
 
-      if (this.state.web3 === undefined) {
-        const web3 = new Web3(window.ethereum);
-        this.setState({ web3: web3 });
-        console.log("Web3 loaded");
-        return web3;
-      } else {
-        return this.state.web3;
-      }
 
+    if (this.state.web3 === undefined) {
+      const web3 = new Web3(window.ethereum);
+      this.setState({ web3: web3 });
+      console.log("Web3 loaded");
+      return web3;
     } else {
-      toaster.notify('Please install MetaMask', {
-        position: 'top-right',
-      });
-      console.log('Please install MetaMask');
-      window.location.assign("https://metamask.io/");
+      return this.state.web3;
     }
+
   }
 
   async loadBlockchainData() {
-    const web3 = await this.loadWeb3();
+    const web3 = Utility.Web3 = await this.loadWeb3();
     const accounts = await web3.eth.getAccounts();
     if (typeof accounts === undefined || accounts.length === 0) {
       console.log('No metamask account loaded.');
@@ -130,60 +157,65 @@ class App extends Component {
       this.setState({ account: accounts[0] });
       const networkId = await web3.eth.net.getId();
 
-      // Get registerUserHub contract details
-      const registerUserHubNetworkData = StandardRegisterUserHub.networks[networkId];
-      if (registerUserHubNetworkData) {
-        this.setState({
-          'registerUserHubContractAddress': registerUserHubNetworkData.address
-        });
-        Utility.RegisterUserHubContractAddress = registerUserHubNetworkData.address;
-        console.log("RegisterUserHub contract loaded:" + this.state.registerUserHubContractAddress);
-        await this.loadContract(StandardRegisterUserHub, this.state.registerUserHubContractAddress, 'registerUserHubContract');
-        Utility.RegisterUserHubContract = this.state.registerUserHubContract;
-        await this.getUserAccountDetails();
-      } else {
-        toaster.notify('RegisterUserHub contract not deployed to detected network', {
-          position: 'top-right',
-        });
-        console.log('RegisterUserHub contract not deployed to detected network');
-      }
-
-
-      // Get StandardProduct contract details
-      const structStorageNetworkData = StructStorage.networks[networkId];
-      if (structStorageNetworkData) {
-        this.setState({
-          'structStorageContractAddress': structStorageNetworkData.address
-        });
-        Utility.StructStorageContractAddress = structStorageNetworkData.address;
-        console.log("StructStorage contract loaded:" + this.state.structStorageContractAddress);
-        await this.loadContract(StructStorage, this.state.structStorageContractAddress, 'structStorageContract');
-        Utility.StructStorageContract = this.state.structStorageContract;
-      } else {
-        toaster.notify('StructStorage contract not deployed to detected network', {
-          position: 'top-right',
-        });
-        console.log('StructStorage contract not deployed to detected network');
-      }
-
-      // Get SupplychainHub contract details
-      const supplychainHubNetworkData = SupplychainHub.networks[networkId];
-      if (supplychainHubNetworkData) {
-        this.setState({
-          'supplychainHubContractAddress': supplychainHubNetworkData.address
-        });
-        Utility.SupplychainHubContractAddress = supplychainHubNetworkData.address;
-        console.log("SupplychainHub contract loaded:" + this.state.supplychainHubContractAddress);
-        await this.loadContract(SupplychainHub, this.state.supplychainHubContractAddress, 'supplychainHubContract');
-        Utility.SupplychainHubContract = this.state.supplychainHubContract;
-      } else {
-        toaster.notify('SupplychainHub contract not deployed to detected network', {
-          position: 'top-right',
-        });
-        console.log('SupplychainHub contract not deployed to detected network');
-      }
+      await this.configureContracts(networkId);
     }
     this.setState({ loading: false });
+  }
+
+  async configureContracts(networkId) {
+
+    // Get registerUserHub contract details
+    const registerUserHubNetworkData = StandardRegisterUserHub.networks[networkId];
+    if (registerUserHubNetworkData) {
+      this.setState({
+        'registerUserHubContractAddress': registerUserHubNetworkData.address
+      });
+      Utility.RegisterUserHubContractAddress = registerUserHubNetworkData.address;
+      console.log("RegisterUserHub contract loaded:" + this.state.registerUserHubContractAddress);
+      await this.loadContract(StandardRegisterUserHub, this.state.registerUserHubContractAddress, 'registerUserHubContract');
+      Utility.RegisterUserHubContract = this.state.registerUserHubContract;
+      await this.getUserAccountDetails();
+    } else {
+      toaster.notify('RegisterUserHub contract not deployed to detected network', {
+        position: 'top-right',
+      });
+      console.log('RegisterUserHub contract not deployed to detected network');
+    }
+
+
+    // Get StandardProduct contract details
+    const structStorageNetworkData = StructStorage.networks[networkId];
+    if (structStorageNetworkData) {
+      this.setState({
+        'structStorageContractAddress': structStorageNetworkData.address
+      });
+      Utility.StructStorageContractAddress = structStorageNetworkData.address;
+      console.log("StructStorage contract loaded:" + this.state.structStorageContractAddress);
+      await this.loadContract(StructStorage, this.state.structStorageContractAddress, 'structStorageContract');
+      Utility.StructStorageContract = this.state.structStorageContract;
+    } else {
+      toaster.notify('StructStorage contract not deployed to detected network', {
+        position: 'top-right',
+      });
+      console.log('StructStorage contract not deployed to detected network');
+    }
+
+    // Get SupplychainHub contract details
+    const supplychainHubNetworkData = SupplychainHub.networks[networkId];
+    if (supplychainHubNetworkData) {
+      this.setState({
+        'supplychainHubContractAddress': supplychainHubNetworkData.address
+      });
+      Utility.SupplychainHubContractAddress = supplychainHubNetworkData.address;
+      console.log("SupplychainHub contract loaded:" + this.state.supplychainHubContractAddress);
+      await this.loadContract(SupplychainHub, this.state.supplychainHubContractAddress, 'supplychainHubContract');
+      Utility.SupplychainHubContract = this.state.supplychainHubContract;
+    } else {
+      toaster.notify('SupplychainHub contract not deployed to detected network', {
+        position: 'top-right',
+      });
+      console.log('SupplychainHub contract not deployed to detected network');
+    }
   }
 
   async loadContract(contractBytecode, contractAddress, stateVar) {
@@ -472,5 +504,4 @@ class App extends Component {
   }
 }
 
-App.contextType = MainContext;
 export default App;

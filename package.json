@@ -13,6 +13,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@metamask/detect-provider": "^1.2.0",
     "@xstate/react": "^1.1.0",
     "babel-polyfill": "6.26.0",
     "babel-preset-env": "1.7.0",
