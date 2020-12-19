@@ -62,15 +62,15 @@ class ProductListing extends Component {
 
             { name: 'universalProductCode', displayName: "Universal Product Code", inputFilterable: true, exactFilterable: true, sortable: true },
             { name: 'cropName', displayName: "Crop Name", inputFilterable: true, sortable: true },
-            { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.pendingActionLink },
-            { name: 'userRating', displayName: "Owner Rating", render: FieldRenderer.userRating },
-            { name: 'quantity', displayName: "Quantity", sortable: true },
+            { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.pendingActionLink, },
+            { name: 'userRating', displayName: "Owner Rating", render: FieldRenderer.userRating, },
+            { name: 'quantity', displayName: "Quantity", sortable: true, inputFilterable: true, exactFilterable: true },
             { name: 'expectedPrice', displayName: "Expected Price", sortable: true },
             { name: 'requiredFunding', displayName: "Required Funding", sortable: true },
             { name: 'availableFunding', displayName: "Available Funding", sortable: true },
-            { name: 'supplyChainStage', displayName: "Supplychain Stage", sortable: true },
+            { name: 'supplyChainStage', displayName: "Supplychain Stage", sortable: true, inputFilterable: true, exactFilterable: true },
             { name: 'ownerName', displayName: "Owner Name", sortable: true, inputFilterable: true, exactFilterable: true },
-            { name: 'ownerAccount', displayName: "Owner Account", inputFilterable: true },
+            { name: 'ownerAccount', displayName: "Owner Account", inputFilterable: true, sortable: true, exactFilterable: true },
             { name: 'props', props: this.props },
         ];
 
