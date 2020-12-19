@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
+import './ProductListing.css';
 
 class PostUserRating extends Component {
 
 
 
   render() {
-    return (<div id='content'>
+    return (<div id='content' className='centered'>
       <form onSubmit={(event) => {
         event.preventDefault()
         this.props.postUserRating(

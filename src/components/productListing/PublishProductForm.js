@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
-
+import './ProductListing.css';
 class PublishProductForm extends Component {
 
 
 
   render() {
-    return (<div id='content'>
-      <h1>Publish Product</h1>
-      <p>Published product will be tracked for crowd funding</p>
+    return (<div id='content' className='centered'>
       <form onSubmit={(event) => {
         event.preventDefault()
         this.props.publishProduct({
@@ -25,6 +23,9 @@ class PublishProductForm extends Component {
           // deadline: parseInt(this.deadline.value) * 24 * 3600
         })
       }}>
+
+        <h1 >Publish Product</h1>
+        <p>Published product will be tracked for crowd funding</p>
         <div>
 
           <input
@@ -108,6 +109,8 @@ class PublishProductForm extends Component {
               placeholder='Product Notes'
             /> */}
         </div>
+        <br />
+        <br />
         <button type='submit' className='btn btn-primary'>Publish Product</button>&nbsp;&nbsp;<button onClick={(event) => { this.props.closePublishView() }} className='btn btn-danger'>Cancel</button>
       </form>
     </div>

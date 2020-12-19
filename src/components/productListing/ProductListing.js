@@ -96,7 +96,7 @@ class ProductListing extends Component {
                     <br />
                     <br />
                     <div >
-                        {((this.props.userRole === NumToUserRole['1'].toString()) && !this.state.showPublishPage) ?
+                        {((this.props.userRole === NumToUserRole['1'].toString()) && !this.state.showPublishPage && !this.state.openUserRatingConfirmView) ?
                             (<button className='btn btn-primary'
                                 onClick={this.publishNewProductView}>
                                 Publish New Product
