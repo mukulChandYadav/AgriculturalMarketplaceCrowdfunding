@@ -1,4 +1,4 @@
-const StructStorage = artifacts.require('./StructStorage.sol');
+const ProductHub = artifacts.require('./ProductHub.sol');
 const SupplychainHub = artifacts.require('./SupplychainHub.sol');
 const StandardRegisterUserHub = artifacts.require('./StandardRegisterUserHub.sol');
 
@@ -12,13 +12,13 @@ require('chai')
 
 
 
-contract('StructStorage', (accounts) => {
-  let structStorage, supplychainHub, standardRegisterUserHub, creator, farmer, investor, customer, upc;
+contract('ProductHub', (accounts) => {
+  let productHub, supplychainHub, standardRegisterUserHub, creator, farmer, investor, customer, upc;
 
   before(async () => {
     standardRegisterUserHub = await StandardRegisterUserHub.new();
     supplychainHub = await SupplychainHub.new();
-    structStorage = await StructStorage.new(supplychainHub.address, standardRegisterUserHub.address);
+    productHub = await ProductHub.new(supplychainHub.address, standardRegisterUserHub.address);
     creator = accounts[0];
     farmer = accounts[1];
     investor = accounts[3];
@@ -27,15 +27,15 @@ contract('StructStorage', (accounts) => {
 
   describe('creation', () => {
     it('deploys successfully', async () => {
-      assert.notEqual(structStorage.address, 0x0);
-      assert.notEqual(structStorage.address, '');
-      assert.notEqual(structStorage.address, null);
-      assert.notEqual(structStorage.address, undefined);
+      assert.notEqual(productHub.address, 0x0);
+      assert.notEqual(productHub.address, '');
+      assert.notEqual(productHub.address, null);
+      assert.notEqual(productHub.address, undefined);
     });
 
     it('verify upc function', async () => {
       const scUPC = await supplychainHub.upc();
-      scUPC.should.be.bignumber.equal(await structStorage.upc());
+      scUPC.should.be.bignumber.equal(await productHub.upc());
     });
   });
 
@@ -50,12 +50,12 @@ contract('StructStorage', (accounts) => {
       });
 
       it('publish product campaign', async () => {
-        await structStorage.produce(web3.utils.asciiToHex("Barley"),
+        await productHub.produce(web3.utils.asciiToHex("Barley"),
           web3.utils.numberToHex(10),
           web3.utils.numberToHex(101),
           web3.utils.numberToHex(55), { from: farmer });
 
-        const retValArray = await structStorage.getproduce(1);
+        const retValArray = await productHub.getproduce(1);
         const cropName = web3.utils.hexToAscii(retValArray[1]).replace(/[^A-Za-z0-9]/g, '');
         upc = retValArray[0];
         assert.equal(cropName, "Barley");
@@ -63,22 +63,22 @@ contract('StructStorage', (accounts) => {
       });
 
       it('Invest in product campaign', async () => {
-        let farmerBalanceBefore = await structStorage.getBalance(farmer);
-        let investorBalanceBefore = await structStorage.getBalance(investor);
+        let farmerBalanceBefore = await productHub.getBalance(farmer);
+        let investorBalanceBefore = await productHub.getBalance(investor);
         upc = 1;
-        const retValArray = await structStorage.getproduce(upc);
+        const retValArray = await productHub.getproduce(upc);
         const reqFunding = retValArray[4];
-        let retVal = await structStorage.fundProduct(farmer,
+        let retVal = await productHub.fundProduct(farmer,
           3,//Investor role
           upc, { from: investor, to: farmer, value: reqFunding.toNumber() });
 
         // Verify Funded product supplychain stage
-        let currentSCStage = await structStorage.getSupplychainStage(upc, { from: investor });
+        let currentSCStage = await productHub.getSupplychainStage(upc, { from: investor });
         currentSCStage.should.be.bignumber.equal(new BN(2, 10));
 
         //Verify transfer of ether from investor to farmer
-        farmerBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await structStorage.getBalance(farmer), 10));
-        investorBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await structStorage.getBalance(investor), 10));
+        farmerBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await productHub.getBalance(farmer), 10));
+        investorBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await productHub.getBalance(investor), 10));
       });
 
 
@@ -86,17 +86,17 @@ contract('StructStorage', (accounts) => {
 
         const supplychainHubOwnerAddress = await supplychainHub.getOwner(); // Same as deployer/creator account
 
-        let farmerBalanceBefore = await structStorage.getBalance(farmer);
-        let supplychainHubOwnerBalanceBefore = await structStorage.getBalance(supplychainHubOwnerAddress);
+        let farmerBalanceBefore = await productHub.getBalance(farmer);
+        let supplychainHubOwnerBalanceBefore = await productHub.getBalance(supplychainHubOwnerAddress);
         upc = 1;
 
-        const retValArrayBefore = await structStorage.getproduce(upc);
+        const retValArrayBefore = await productHub.getproduce(upc);
 
-        let retVal = await structStorage.harvestProduct(upc, { from: farmer, to: supplychainHubOwnerAddress, value: retValArrayBefore[5] });
+        let retVal = await productHub.harvestProduct(upc, { from: farmer, to: supplychainHubOwnerAddress, value: retValArrayBefore[5] });
         //TODO: why assert.equal(retVal, true); fails, returns transaction receipt
 
         // Verify harvested product supplychain stage
-        let currentSCStage = await structStorage.getSupplychainStage(upc, { from: farmer });
+        let currentSCStage = await productHub.getSupplychainStage(upc, { from: farmer });
         currentSCStage.should.be.bignumber.equal(new BN(3, 10));
 
         // Transfering ownership only when put for sale, next stage
@@ -109,67 +109,67 @@ contract('StructStorage', (accounts) => {
 
 
         //Verify transfer of ether from farmer to supplychainHubOwner, transfer of debt
-        farmerBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await structStorage.getBalance(farmer), 10));
-        supplychainHubOwnerBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await structStorage.getBalance(investor), 10));
+        farmerBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await productHub.getBalance(farmer), 10));
+        supplychainHubOwnerBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await productHub.getBalance(investor), 10));
       });
 
       it('Put harvested product on sale', async () => {
 
         const supplychainHubOwnerAddress = await supplychainHub.getOwner(); // Same as deployer/creator account
 
-        let farmerBalanceBefore = await structStorage.getBalance(farmer);
-        let supplychainHubOwnerBalanceBefore = await structStorage.getBalance(supplychainHubOwnerAddress);
+        let farmerBalanceBefore = await productHub.getBalance(farmer);
+        let supplychainHubOwnerBalanceBefore = await productHub.getBalance(supplychainHubOwnerAddress);
         upc = 1;
 
-        const retValArrayBefore = await structStorage.getproduce(upc);
+        const retValArrayBefore = await productHub.getproduce(upc);
 
         // Pay farmer expected price, and settle debts to investors from marketplace account
-        let retVal = await structStorage.markProductForSale(upc, { from: supplychainHubOwnerAddress, to: farmer, value: retValArrayBefore[3] });
+        let retVal = await productHub.markProductForSale(upc, { from: supplychainHubOwnerAddress, to: farmer, value: retValArrayBefore[3] });
         //TODO: why assert.equal(retVal, true); fails, returns transaction receipt
 
         // Verify harvested product supplychain stage
-        let currentSCStage = await structStorage.getSupplychainStage(upc, { from: supplychainHubOwnerAddress });
+        let currentSCStage = await productHub.getSupplychainStage(upc, { from: supplychainHubOwnerAddress });
         currentSCStage.should.be.bignumber.equal(new BN(4, 10));
 
         // Verify transfer of ownership to supplychain marketplace
-        const retValArrayAfter = await structStorage.getproduce(upc);
+        const retValArrayAfter = await productHub.getproduce(upc);
         const newOwner = retValArrayAfter[6];
         assert.isNotTrue(newOwner === farmer);
         assert.equal(newOwner, supplychainHubOwnerAddress);
 
 
         //Verify transfer of ether to farmer(previous owner) from supplychainHubOwner(new owner)
-        farmerBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await structStorage.getBalance(farmer), 10));
-        supplychainHubOwnerBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await structStorage.getBalance(supplychainHubOwnerAddress), 10));
+        farmerBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await productHub.getBalance(farmer), 10));
+        supplychainHubOwnerBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await productHub.getBalance(supplychainHubOwnerAddress), 10));
       });
 
       it('Sale product to end customer', async () => {
 
         const supplychainHubOwnerAddress = await supplychainHub.getOwner(); // Same as deployer/creator account
 
-        let customerBalanceBefore = await structStorage.getBalance(customer);
-        let supplychainHubOwnerBalanceBefore = await structStorage.getBalance(supplychainHubOwnerAddress);
+        let customerBalanceBefore = await productHub.getBalance(customer);
+        let supplychainHubOwnerBalanceBefore = await productHub.getBalance(supplychainHubOwnerAddress);
         upc = 1;
 
-        const retValArrayBefore = await structStorage.getproduce(upc);
+        const retValArrayBefore = await productHub.getproduce(upc);
 
         // Pay farmer expected price, and settle debts to investors from marketplace account
-        let retVal = await structStorage.saleToCustomer(upc, { from: customer, to: supplychainHubOwnerAddress, value: retValArrayBefore[3] });
+        let retVal = await productHub.saleToCustomer(upc, { from: customer, to: supplychainHubOwnerAddress, value: retValArrayBefore[3] });
         //TODO: why assert.equal(retVal, true); fails, returns transaction receipt
         //assert.equal(retVal, true);
 
         // Verify sold product supplychain stage
-        let currentSCStage = await structStorage.getSupplychainStage(upc, { from: customer });
+        let currentSCStage = await productHub.getSupplychainStage(upc, { from: customer });
         currentSCStage.should.be.bignumber.equal(new BN(5, 10));
 
         // Verify transfer of ownership to supplychain marketplace
-        const retValArrayAfter = await structStorage.getproduce(upc);
+        const retValArrayAfter = await productHub.getproduce(upc);
         const newOwner = retValArrayAfter[6];
         assert.equal(newOwner, customer);
 
         //Verify transfer of ether to farmer(previous owner) from supplychainHubOwner(new owner)
-        customerBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await structStorage.getBalance(customer), 10));
-        supplychainHubOwnerBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await structStorage.getBalance(investor), 10));
+        customerBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await productHub.getBalance(customer), 10));
+        supplychainHubOwnerBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await productHub.getBalance(investor), 10));
       });
 
       it('Payout to investors', async () => {
@@ -177,28 +177,28 @@ contract('StructStorage', (accounts) => {
         const supplychainHubOwnerAddress = await supplychainHub.getOwner(); // Same as deployer/creator account
 
         // Verify sold product supplychain stage
-        let currentSCStage = await structStorage.getSupplychainStage(upc, { from: supplychainHubOwnerAddress });
+        let currentSCStage = await productHub.getSupplychainStage(upc, { from: supplychainHubOwnerAddress });
         currentSCStage.should.be.bignumber.equal(new BN(5, 10));
 
         
         // Get balance amount to be paid to an investor for a product
         upc = 1;
-        let contributorList = await structStorage.getContributorListForAProduct(upc);
+        let contributorList = await productHub.getContributorListForAProduct(upc);
         //contributorList.array.forEach(productContributor => {
         let productContributor = contributorList[0];
 
 
-        let supplychainHubOwnerBalanceBefore = await structStorage.getBalance(supplychainHubOwnerAddress);
-        let contributorBalanceBefore = await structStorage.getBalance(productContributor);
+        let supplychainHubOwnerBalanceBefore = await productHub.getBalance(supplychainHubOwnerAddress);
+        let contributorBalanceBefore = await productHub.getBalance(productContributor);
 
 
-        let payoutBalanceAmount = new BN(await structStorage.getPayoutAmountForContributorToAProduct(upc, productContributor));
+        let payoutBalanceAmount = new BN(await productHub.getPayoutAmountForContributorToAProduct(upc, productContributor));
         // Send payment to contributor
-        let retVal = await structStorage.sendMarketplacePayoutToInvestor(upc, productContributor, { from: supplychainHubOwnerAddress, to: productContributor, value: payoutBalanceAmount.toNumber() });
+        let retVal = await productHub.sendMarketplacePayoutToInvestor(upc, productContributor, { from: supplychainHubOwnerAddress, to: productContributor, value: payoutBalanceAmount.toNumber() });
 
         // Verify payment made
-        contributorBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await structStorage.getBalance(productContributor), 10));
-        supplychainHubOwnerBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await structStorage.getBalance(supplychainHubOwnerAddress), 10));
+        contributorBalanceBefore.should.be.bignumber.that.is.lessThan(new BN(await productHub.getBalance(productContributor), 10));
+        supplychainHubOwnerBalanceBefore.should.be.bignumber.that.is.greaterThan(new BN(await productHub.getBalance(supplychainHubOwnerAddress), 10));
 
         // });
 

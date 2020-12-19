@@ -69,7 +69,7 @@ module.exports = async function (deployer, network, accounts) {
 
   await deployer.deploy(ProductHub, SupplychainHub.address, StandardRegisterUserHub.address, { from: accounts[9] });
   let productHub = await ProductHub.deployed();
-  console.log("Struct Storage deployed addr:", ProductHub.address);
+  console.log("Product Hub deployed addr:", ProductHub.address);
   if (network !== "test") {
     var pro1 = productHub.produce(
       web3.utils.asciiToHex("Barley"),
