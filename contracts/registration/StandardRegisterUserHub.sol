@@ -2,18 +2,25 @@
 pragma solidity >=0.4.22 <0.8.0;
 
 import "./RegisterUserHub.sol";
+import "../utils/Math.sol";
 
 // Implementation for RegisterUserHub abstract class
 contract StandardRegisterUserHub is RegisterUserHub {
     constructor() public Ownable() {}
 
     modifier notRegistered() {
-        require(registeredUsers[msg.sender] == UserRoleType.DefaultPlaceholder);
+        require(
+            userStore[msg.sender].userRoleType ==
+                UserRoleType.DefaultPlaceholder
+        );
         _;
     }
 
     modifier hasRegistered() {
-        require(registeredUsers[msg.sender] != UserRoleType.DefaultPlaceholder);
+        require(
+            userStore[msg.sender].userRoleType !=
+                UserRoleType.DefaultPlaceholder
+        );
         _;
     }
 
@@ -26,34 +33,34 @@ contract StandardRegisterUserHub is RegisterUserHub {
         bool retVal = false;
 
         if (userRoleType == 1) {
-            registeredUsers[account] = UserRoleType.Farmer;
+            userStore[account].userRoleType = UserRoleType.Farmer;
             addFarmer(account);
             retVal = true;
         } else {
             if (userRoleType == 2) {
-                registeredUsers[account] = UserRoleType.Donor;
+                userStore[account].userRoleType = UserRoleType.Donor;
                 addDonor(account);
                 retVal = true;
             } else {
                 if (userRoleType == 3) {
-                    registeredUsers[account] = UserRoleType.Investor;
+                    userStore[account].userRoleType = UserRoleType.Investor;
                     addInvestor(account);
                     retVal = true;
                 } else {
                     if (userRoleType == 4) {
-                        registeredUsers[account] = UserRoleType
+                        userStore[account].userRoleType = UserRoleType
                             .ForwardMarketConsumer;
                         addForwardMarketConsumer(account);
                         retVal = true;
                     } else {
                         if (userRoleType == 5) {
-                            registeredUsers[account] = UserRoleType
+                            userStore[account].userRoleType = UserRoleType
                                 .SportMarketConsumer;
                             addSpotMarketConsumer(account);
                             retVal = true;
                         } else {
                             if (userRoleType == 6) {
-                                registeredUsers[account] = UserRoleType
+                                userStore[account].userRoleType = UserRoleType
                                     .MarketplaceManager;
                                 addMarketplaceManager(account);
                                 retVal = true;
@@ -63,7 +70,7 @@ contract StandardRegisterUserHub is RegisterUserHub {
                 }
             }
         }
-        userNames[account] = userName;
+        userStore[account].userName = userName;
         return retVal;
     }
 
@@ -79,7 +86,12 @@ contract StandardRegisterUserHub is RegisterUserHub {
 
     //Check if account has registered
     function isRegistered() public override view returns (bool) {
-        return registeredUsers[msg.sender] != UserRoleType.DefaultPlaceholder;
+        return isRegisteredUser(msg.sender);
+    }
+
+    //Check if account has registered
+    function isRegisteredUser(address user) public view returns (bool) {
+        return userStore[user].userRoleType != UserRoleType.DefaultPlaceholder;
     }
 
     //Check if account has registered
@@ -90,7 +102,7 @@ contract StandardRegisterUserHub is RegisterUserHub {
         hasRegistered
         returns (UserRoleType)
     {
-        return registeredUsers[msg.sender];
+        return userStore[msg.sender].userRoleType;
     }
 
     // Get sender accounts registered userName
@@ -101,7 +113,7 @@ contract StandardRegisterUserHub is RegisterUserHub {
         hasRegistered
         returns (string memory)
     {
-        return userNames[msg.sender];
+        return userStore[msg.sender].userName;
     }
 
     //Get username of another EOA user
@@ -113,6 +125,28 @@ contract StandardRegisterUserHub is RegisterUserHub {
             string memory
         )
     {
-        return userNames[accountAddress];
+        return userStore[accountAddress].userName;
+    }
+
+    //Get user rating assigned to account
+    function getUserRating(address user) public override view returns (int256) {
+        require(isRegisteredUser(user), "Provided user not registered");
+        return userStore[user].rating;
+    }
+
+    //Update user rating assigned to account
+    function setUserRating(int256 providedRating, address user)
+        public
+        override
+        returns (bool)
+    {
+        require(isRegisteredUser(user), "Provided user not registered");
+        require(user != msg.sender, "User cannot rate himself");
+        int256 totalReviewCount = Math.add(userStore[user].reviewsReceived, 1);
+        int256 revisedDiff = Math.sub(providedRating, userStore[user].rating);
+        int256 revisedRatingPoint = revisedDiff/ totalReviewCount;
+        userStore[user].rating = Math.add(userStore[user].rating, revisedRatingPoint);
+        userStore[user].reviewsReceived = totalReviewCount;
+        return true;
     }
 }

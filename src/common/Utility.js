@@ -4,8 +4,8 @@ export default class Utility {
     static RegisterUserHubContractAddress;
     static RegisterUserHubContract;
 
-    static StructStorageContractAddress;
-    static StructStorageContract;
+    static ProductHubContractAddress;
+    static ProductHubContract;
 
     static SupplychainHubContractAddress;
     static SupplychainHubContract;

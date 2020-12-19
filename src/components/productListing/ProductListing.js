@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 //import {Link} from 'react-router-dom';
-import { UserRoleToNum, NumToUserRole, /*FundingStage*/ } from '../Constants';
+import { NumToUserRole, /*FundingStage*/ } from '../Constants';
 import PublishProductForm from './PublishProductForm';
 import FieldRenderer from './FieldRenderer';
-
+import PostUserRating from './PostUserRating';
 
 const FilterableTable = require('react-filterable-table');
 class ProductListing extends Component {
@@ -11,30 +11,42 @@ class ProductListing extends Component {
         super(props);
         console.log(props);
 
-
-        this.publishNewProduct = this.publishNewProduct.bind(this);
+        //this.publishNewProductFormRef = React.createRef();
+        this.publishNewProductView = this.publishNewProductView.bind(this);
+        this.returnToProductListView = this.returnToProductListView.bind(this);
+        this.toggleUserRatingConfirmView = this.toggleUserRatingConfirmView.bind(this);
 
         this.state = {
             loading: true,
             showPublishPage: false,
             dataReady: false,
-            tableData: []
+            tableData: [],
+            openUserRatingConfirmView: false
         }
-
     }
 
-    async publishNewProduct() {
+    async publishNewProductView() {
         this.setState({ showPublishPage: true });
     }
 
+    async toggleUserRatingConfirmView(userName, userAccount, receivedUserRating) {
+        console.log("Toggle Popup");
+        this.ratedUserName = userName;
+        this.ratedUserAccount = userAccount;
+        this.ratedUserReceivedRating = receivedUserRating;
+        this.setState({ openUserRatingConfirmView: !this.state.openUserRatingConfirmView });
+    }
 
-    async componentWillMount() {
+    async returnToProductListView() {
+        this.setState({ showPublishPage: false });
+    }
+
+    async componentDidMount() {
 
         console.log("Product listing state & props");
         console.log(this.state);
         console.log(this.props);
-        console.log(UserRoleToNum.FarmerRole, typeof UserRoleToNum.FarmerRole)
-        console.log(this.props.userRole, typeof this.props.userRole)
+        console.log(this.props.userRole, typeof this.props.userRole);
 
 
         this.props.getPublishedProductDetails()
@@ -51,6 +63,8 @@ class ProductListing extends Component {
             }).catch(err => {
                 console.log(err);
             });
+
+
 
     }
 
@@ -71,7 +85,7 @@ class ProductListing extends Component {
             { name: 'supplyChainStage', displayName: "Supplychain Stage", sortable: true, inputFilterable: true, exactFilterable: true },
             { name: 'ownerName', displayName: "Owner Name", sortable: true, inputFilterable: true, exactFilterable: true },
             { name: 'ownerAccount', displayName: "Owner Account", inputFilterable: true, sortable: true, exactFilterable: true },
-            { name: 'props', props: this.props },
+            { name: 'props', displayName: "", props: { ...this.props, toggleUserRatingConfirmView: this.toggleUserRatingConfirmView } },
         ];
 
 
@@ -82,20 +96,23 @@ class ProductListing extends Component {
                     <br />
                     <br />
                     <div >
-                        {((this.props.userRole !== NumToUserRole['1'].toString()) || //Not farmer
-                            (this.state.showPublishPage ? true : false)) ? null :
+                        {((this.props.userRole === NumToUserRole['1'].toString()) && !this.state.showPublishPage) ?
                             (<button className='btn btn-primary'
-                                onClick={this.publishNewProduct}>
+                                onClick={this.publishNewProductView}>
                                 Publish New Product
-                            </button>)}
+                            </button>) : null}
                         <br />
                         <br />
                     </div>
                     {
-                        this.state.showPublishPage ? <div><PublishProductForm account={this.props.accounts} {...this.state} {...this.props} /></div> : null
+                        (this.state.showPublishPage) ? (<div><PublishProductForm
+                            closePublishView={this.returnToProductListView}
+                            account={this.props.accounts}
+                            {...this.state} {...this.props} />
+                        </div>) : null //ref={this.publishNewProductFormRef}
                     }{
 
-                        this.state.dataReady ?
+                        (this.state.dataReady && !this.state.showPublishPage && !this.state.openUserRatingConfirmView) ?
                             (<div><FilterableTable
                                 namespace="People"
                                 initialSort="name"
@@ -104,6 +121,14 @@ class ProductListing extends Component {
                                 roRecordsMessage="There are no products to display"
                                 noFilteredRecordsMessage="No product match your filters!"
                             /></div>) : null
+                    }
+                    {
+                        this.state.openUserRatingConfirmView ? (<PostUserRating
+                            postUserRating={this.props.postUserRating}
+                            ratedUserName={this.ratedUserName}
+                            ratedUserAccount={this.ratedUserAccount}
+                            ratedUserReceivedRating={this.ratedUserReceivedRating}
+                            toggleViewHandler={this.toggleUserRatingConfirmView} />) : null
                     }
                 </div>
             </div>

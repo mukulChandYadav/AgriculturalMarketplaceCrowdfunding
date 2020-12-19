@@ -1,5 +1,5 @@
 import Utility from '../common/Utility';
-import StructStorage from '../artifacts/StructStorage';
+import ProductHub from '../artifacts/ProductHub';
 
 
 
@@ -9,10 +9,10 @@ import StructStorage from '../artifacts/StructStorage';
 export const transferFund = (ctx, e) => {
 
     console.log('transferFund', 'context',ctx, 'event',e);
-    console.log('StructStorage',StructStorage,Utility.StructStorageContractAddress, Utility.Web3);
+    console.log('StructStorage',ProductHub,Utility.ProductHubContractAddress, Utility.Web3);
 
     //this.setState({ loading: true });
-    const productContract = new Utility.Web3.eth.Contract(StructStorage.abi, Utility.StructStorageContractAddress);
+    const productContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
     console.log('productContract',productContract);
     //const performTransferPromise = {};
     const userRoletype = 3; //Hardcoded to Investor
@@ -41,9 +41,9 @@ export const transferFund = (ctx, e) => {
   export const harvestProduct = (ctx, e) => {
 
     console.log('harvestProduct', 'context',ctx, 'event',e);
-    console.log('StructStorage',StructStorage,Utility.StructStorageContractAddress, Utility.Web3);
+    console.log('StructStorage',ProductHub,Utility.ProductHubContractAddress, Utility.Web3);
 
-    const productContract = new Utility.Web3.eth.Contract(StructStorage.abi, Utility.StructStorageContractAddress);
+    const productContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
     console.log('productContract',productContract);
     
     //const userRoletype = 1; //Hardcoded to Farmer
@@ -73,9 +73,9 @@ export const transferFund = (ctx, e) => {
   export const transferProductOwnershipToMarketplace = (ctx, e) => {
 
     console.log('transferProductOwnershipToMarketplace', 'context',ctx, 'event',e);
-    console.log('StructStorage',StructStorage,Utility.StructStorageContractAddress, Utility.Web3);
+    console.log('StructStorage',ProductHub,Utility.ProductHubContractAddress, Utility.Web3);
 
-    const productContract = new Utility.Web3.eth.Contract(StructStorage.abi, Utility.StructStorageContractAddress);
+    const productContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
     console.log('productContract',productContract);
     
     //const userRoletype = 1; //Hardcoded to Farmer
@@ -105,9 +105,9 @@ export const transferFund = (ctx, e) => {
   export const sellToCustomer = (ctx, e) => {
 
     console.log('sellToCustomer', 'context',ctx, 'event',e);
-    console.log('StructStorage',StructStorage,Utility.StructStorageContractAddress, Utility.Web3);
+    console.log('StructStorage',ProductHub,Utility.ProductHubContractAddress, Utility.Web3);
 
-    const productContract = new Utility.Web3.eth.Contract(StructStorage.abi, Utility.StructStorageContractAddress);
+    const productContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
     console.log('productContract',productContract);
     
     //const userRoletype = 1; //Hardcoded to Farmer

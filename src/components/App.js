@@ -1,6 +1,6 @@
 
 import SupplychainHub from '../artifacts/SupplychainHub';
-import StructStorage from '../artifacts/StructStorage';
+import ProductHub from '../artifacts/ProductHub';
 import StandardRegisterUserHub from '../artifacts/StandardRegisterUserHub';
 import React, { Component } from 'react';
 import Navbar from './Navbar';
@@ -33,14 +33,13 @@ class App extends Component {
       registerUserHubContractAddress: '',
       loading: true,
       productSCMachinesIndexedByID: [{}], // With place holder as upc starts at 1
-      productSCServicesIndexedByID: [{}],
-      zeroAddr: '0x0000000000000000000000000000000000000000'
+      productSCServicesIndexedByID: [{}]
     }
     this.getPublishedProductDetails = this.getPublishedProductDetails.bind(this);
     this.registerUser = this.registerUser.bind(this);
     this.publishProduct = this.publishProduct.bind(this);
     //this.getProductDetails = this.getProductDetails.bind(this);
-    this.fundProduct = this.fundProduct.bind(this);
+    this.postUserRating = this.postUserRating.bind(this);
     this.getUserAccountDetails = this.getUserAccountDetails.bind(this);
     this.loadContract = this.loadContract.bind(this);
 
@@ -184,20 +183,20 @@ class App extends Component {
 
 
     // Get StandardProduct contract details
-    const structStorageNetworkData = StructStorage.networks[networkId];
-    if (structStorageNetworkData) {
+    const productHubNetworkData = ProductHub.networks[networkId];
+    if (productHubNetworkData) {
       this.setState({
-        'structStorageContractAddress': structStorageNetworkData.address
+        'productHubContractAddress': productHubNetworkData.address
       });
-      Utility.StructStorageContractAddress = structStorageNetworkData.address;
-      console.log("StructStorage contract loaded:" + this.state.structStorageContractAddress);
-      await this.loadContract(StructStorage, this.state.structStorageContractAddress, 'structStorageContract');
-      Utility.StructStorageContract = this.state.structStorageContract;
+      Utility.ProductHubContractAddress = productHubNetworkData.address;
+      console.log("ProductHub contract loaded:" + this.state.productHubContractAddress);
+      await this.loadContract(ProductHub, this.state.productHubContractAddress, 'productHubContract');
+      Utility.ProductHubContract = this.state.productHubContract;
     } else {
-      toaster.notify('StructStorage contract not deployed to detected network', {
+      toaster.notify('ProductHub contract not deployed to detected network', {
         position: 'top-right',
       });
-      console.log('StructStorage contract not deployed to detected network');
+      console.log('ProductHub contract not deployed to detected network');
     }
 
     // Get SupplychainHub contract details
@@ -255,7 +254,7 @@ class App extends Component {
       parseInt(args.expectedPrice),
       parseInt(args.requiredFunding)
     );
-    this.state.structStorageContract.methods.produce(
+    this.state.productHubContract.methods.produce(
       web3.utils.asciiToHex(args.cropName),
       web3.utils.numberToHex(args.quantity),
       web3.utils.numberToHex(args.expectedPrice),
@@ -299,18 +298,21 @@ class App extends Component {
   async getPublishedProductDetails() {
     const web3 = this.state.web3;
     var data = [];
-    if (this.state.structStorageContract !== undefined && this.state.structStorageContract !== '') {
-      const productIDCounterInclusive = await this.state.structStorageContract.methods.upc().call({
+    if (this.state.productHubContract !== undefined && this.state.productHubContract !== '') {
+      const productIDCounterInclusive = await this.state.productHubContract.methods.upc().call({
         from: this.state.account
       });
       console.log("productIDCounterInclusive", productIDCounterInclusive);
 
       for (var productID = 1; productID < productIDCounterInclusive; ++productID) {
-        const productDetail = await this.state.structStorageContract.methods
+        const productDetail = await this.state.productHubContract.methods
           .getproduce(productID)
           .call({ from: this.state.account });
         const accountUserName = await this.state.registerUserHubContract.methods
           .getUserNameOf(productDetail[6])
+          .call({ from: this.state.account });
+        const accountUserRating = await this.state.registerUserHubContract.methods
+          .getUserRating(productDetail[6])
           .call({ from: this.state.account });
         const productSupplychainStatusOrdinal = await this.state.supplychainHubContract.methods
           .getSupplychainStatus(productID)
@@ -324,6 +326,7 @@ class App extends Component {
           availableFunding: productDetail[5],
           ownerAccount: productDetail[6],
           ownerName: accountUserName,
+          userRating: accountUserRating,
           supplyChainStage: OrdinalToSupplyChainStatus[productSupplychainStatusOrdinal]
         };
 
@@ -338,7 +341,7 @@ class App extends Component {
       }
       console.log("Product Details", data);
 
-      const balance = await this.state.structStorageContract.methods
+      const balance = await this.state.productHubContract.methods
         .getBalance(this.state.account)
         .call({ from: this.state.account });
       this.setState({ userBalance: balance });
@@ -346,27 +349,24 @@ class App extends Component {
 
     } else {
 
-      toaster.notify('structStorageContract not loaded', {
+      toaster.notify('productHubContract not loaded', {
         position: 'top-right',
       });
-      console.error("structStorageContract not loaded");
+      console.error("productHubContract not loaded");
     }
 
     return data;
   }
 
 
-  async fundProduct(receiverAccount, contributionAmount, userRoletype, productID) {
+  async postUserRating(userRating, userAccount) {
     this.setState({ loading: true });
-    const productContract = new this.state.web3.eth.Contract(StructStorage.abi, this.state.structStorageContractAddress);
-
-    userRoletype = 3; //Hardcoded to Investor
-    productContract.methods.fundProduct(receiverAccount, userRoletype, productID)
+    const registerUserHubContract = new this.state.web3.eth.Contract(StandardRegisterUserHub.abi, this.state.registerUserHubContractAddress);
+    //console.log("Post user rating", Number(userRating), userAccount);
+    registerUserHubContract.methods.setUserRating(Number(userRating), userAccount)
       .send({
-        from: this.state.account,
-        value: Number(contributionAmount)
+        from: this.state.account
       }).on('receipt', async (receipt) => {
-        //await this.loadSupplychainHub()
         this.setState({ loading: false });
         console.log(receipt);
       }).on('error', function (error, receipt) {
@@ -376,6 +376,7 @@ class App extends Component {
       });
 
   }
+
 
 
   // machine is raw state machine, will run it with the interpreter
@@ -472,7 +473,7 @@ class App extends Component {
 
         return (
           <ProductListing
-            fundProduct={this.fundProduct} publishProduct={this.publishProduct} getPublishedProductDetails={this.getPublishedProductDetails} account={this.state.account} userRole={this.state.userRole} {...this.state}
+            postUserRating={this.postUserRating} publishProduct={this.publishProduct} getPublishedProductDetails={this.getPublishedProductDetails} account={this.state.account} userRole={this.state.userRole} {...this.state}
           />
         )
       } else {

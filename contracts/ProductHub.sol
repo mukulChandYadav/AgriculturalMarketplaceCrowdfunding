@@ -8,7 +8,7 @@ import "./SupplychainHub.sol";
 import "./registration/StandardRegisterUserHub.sol";
 
 // Controller contract for product interaction & workflow
-contract StructStorage is Ownable {
+contract ProductHub is Ownable {
     SupplychainHub supplychainProductStateContract;
     StandardRegisterUserHub standardRegisterUserHubContract;
 
@@ -250,7 +250,7 @@ contract StructStorage is Ownable {
         uint256 requiredFunding
     ) public returns (bool) {
         uint256 currentUPC = supplychainProductStateContract.upc();
-        StructStorage.product memory fnew = product(
+        ProductHub.product memory fnew = product(
             currentUPC,
             cropName,
             quantity,

@@ -19,7 +19,7 @@ export default {
          * */
         //let fundProduct = fields[fields.length - 1].props.fundProduct;
         const userRole = fields[fields.length - 1].props.userRole;
-        const scfsmList = fields[fields.length - 1].props.productSCServicesIndexedByID
+        const scfsmList = fields[fields.length - 1].props.productSCServicesIndexedByID;
         // const productContractAddress = props.record.productContractAddress;
         const productID = props.record.universalProductCode;
         const activeUserAccount = fields[fields.length - 1].props.account;
@@ -175,24 +175,29 @@ export default {
     },
     userRating: function (props) {
 
-        const val = getVal();
-        function ratingChanged() {
-
-        }
-        function getVal() {
-            return (Math.random() * Math.floor(6));
+        const val = props.record.userRating;
+        let fields = props.fields;
+        const toggleUserRatingConfirmViewHandler = fields[fields.length - 1].props.toggleUserRatingConfirmView;
+        const activeUserAccount = fields[fields.length - 1].props.account;
+        function ratingChanged(newRating) {
+            toggleUserRatingConfirmViewHandler(props.record.ownerName, props.record.ownerAccount, newRating);
         }
         return (
-            <ReactStars
-                count={5}
-                onChange={ratingChanged}
-                value={val}
-                size={15}
-                isHalf={true}
-                emptyIcon={<i className="far fa-star"></i>}
-                halfIcon={<i className="fa fa-star-half-alt"></i>}
-                fullIcon={<i className="fa fa-star"></i>}
-                activeColor="#ffd700"
-            />);
+            <div>
+                <ReactStars
+                    count={5}
+                    onChange={ratingChanged}
+                    value={Number(val)}
+                    size={15}
+                    isHalf={false}
+                    edit={props.record.ownerAccount !== activeUserAccount}
+                    emptyIcon={<i className="far fa-star"></i>}
+                    halfIcon={<i className="fa fa-star-half-alt"></i>}
+                    fullIcon={<i className="fa fa-star"></i>}
+                    activeColor="#ffd700"
+                />
+
+            </div>
+        );
     }
 }
