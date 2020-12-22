@@ -5,6 +5,7 @@ pragma solidity >=0.4.22 <0.8.0;
 
 //pragma solidity ^0.5.0;
 import "./base/Ownable.sol";
+import "./registration/StandardRegisterUserHub.sol";
 
 // Manages product supplychain stage transitions
 contract SupplychainHub is Ownable {
@@ -19,7 +20,7 @@ contract SupplychainHub is Ownable {
     uint256 public upc;
     //address payable public owner;
     mapping(uint256 => SupplychainStage) upcToSupplychainStage;
-    mapping(address => mapping(uint256 => uint256)) payablesToProductIdToAmount;
+    mapping(address => mapping(uint256 => uint256)) contributorsToProductIdToAmount;
     mapping(uint256 => address[]) payablesForProductIDLUT;
     mapping(uint256 => mapping(address => bool)) payablesForProductIDFlagged;
 
@@ -35,7 +36,34 @@ contract SupplychainHub is Ownable {
         uint256 _universalProductCode,
         address payable contributor
     ) public view returns (uint256) {
-        return payablesToProductIdToAmount[contributor][_universalProductCode];
+        // require(
+        //     contributorsToProductIdToAmount[contributor][_universalProductCode] >
+        //         0,
+        //     "Given Account made no contribution to given product campaign"
+        // );
+        // require(
+        //     payablesForProductIDFlagged[_universalProductCode][contributor] ==
+        //         true,
+        //     "No contribution transactions were recorded from this account for given product campaign"
+        // );
+        return
+            contributorsToProductIdToAmount[contributor][_universalProductCode];
+    }
+
+    /**
+     *  Return contributed amount from Donor/Investor for a particular harvested product
+     */
+    function getContributedAmountForContributor(
+        uint256 _universalProductCode,
+        address payable contributor
+    ) public view returns (uint256) {
+        require(
+            contributorsToProductIdToAmount[contributor][_universalProductCode] >
+                0,
+            "No contribution transactions were recorded from this account for given product campaign"
+        );
+        return
+            contributorsToProductIdToAmount[contributor][_universalProductCode];
     }
 
     /**
@@ -44,12 +72,26 @@ contract SupplychainHub is Ownable {
      */
     function acceptFundsFromSender(
         uint256 _universalProductCode,
+        uint256 userRoleType,
         address payable contributor,
         uint256 amount
     ) public returns (bool) {
-        payablesToProductIdToAmount[contributor][_universalProductCode] += amount;
-        payablesForProductIDLUT[_universalProductCode].push(contributor);
-        payablesForProductIDFlagged[_universalProductCode][contributor] = true;
+        contributorsToProductIdToAmount[contributor][_universalProductCode] += amount;
+
+        // Add to payables for Investor role type users
+        if (
+            userRoleType == 3
+            //(uint256)(StandardRegisterUserHub.UserRoleType.Investor)
+        ) {
+            if (
+                !payablesForProductIDFlagged[_universalProductCode][contributor]
+            ) {
+                payablesForProductIDLUT[_universalProductCode].push(
+                    contributor
+                );
+            }
+            payablesForProductIDFlagged[_universalProductCode][contributor] = true;
+        }
         return true;
     }
 
@@ -61,7 +103,7 @@ contract SupplychainHub is Ownable {
         uint256 _universalProductCode,
         address payable contributor
     ) public returns (bool) {
-        payablesToProductIdToAmount[contributor][_universalProductCode] = 0;
+        contributorsToProductIdToAmount[contributor][_universalProductCode] = 0;
         payablesForProductIDFlagged[_universalProductCode][contributor] = false;
         return true;
     }
@@ -74,44 +116,35 @@ contract SupplychainHub is Ownable {
         uint256 _universalProductCode,
         address contributor
     ) public view returns (uint256) {
-        return payablesToProductIdToAmount[contributor][_universalProductCode];
+        return
+            contributorsToProductIdToAmount[contributor][_universalProductCode];
     }
 
     /**
-     * Get list of investors for product
+     * Get Investor from list of investors for a product
      *
      */
-    function getListOfPayblesForProduct(uint256 _universalProductCode)
+    function getFromListOfPayblesForProduct(
+        uint256 _universalProductCode,
+        uint256 entryNum
+    ) public view returns (address) {
+        require(
+            entryNum < payablesForProductIDLUT[_universalProductCode].length,
+            "Entry number exceeds number of contributors"
+        );
+        return payablesForProductIDLUT[_universalProductCode][entryNum];
+    }
+
+    /**
+     * Get total number of investors for a product
+     *
+     */
+    function getNumberOfPayblesForProduct(uint256 _universalProductCode)
         public
         view
-        returns (address[] memory)
+        returns (uint256)
     {
-        uint8 len = 0;
-        for (
-            uint256 i = 0;
-            i < payablesForProductIDLUT[_universalProductCode].length;
-            ++i
-        ) {
-            if (
-                payablesForProductIDFlagged[_universalProductCode][payablesForProductIDLUT[_universalProductCode][i]]
-            ) {
-                ++len;
-            }
-        }
-        address[] memory listOfPayable = new address[](len);
-        len = 0;
-        for (
-            uint256 i = 0;
-            i < payablesForProductIDLUT[_universalProductCode].length;
-            ++i
-        ) {
-            if (
-                payablesForProductIDFlagged[_universalProductCode][payablesForProductIDLUT[_universalProductCode][i]]
-            ) {
-                listOfPayable[len] = payablesForProductIDLUT[_universalProductCode][i];
-            }
-        }
-        return listOfPayable;
+        return payablesForProductIDLUT[_universalProductCode].length;
     }
 
     /**

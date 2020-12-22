@@ -9,7 +9,7 @@ const FilterableTable = require('react-filterable-table');
 class ProductListing extends Component {
     constructor(props) {
         super(props);
-        console.log(props);
+        console.log('Product Listing received props:', props);
 
         //this.publishNewProductFormRef = React.createRef();
         this.publishNewProductView = this.publishNewProductView.bind(this);
@@ -17,10 +17,9 @@ class ProductListing extends Component {
         this.toggleUserRatingConfirmView = this.toggleUserRatingConfirmView.bind(this);
 
         this.state = {
-            loading: true,
+            loading: false,
             showPublishPage: false,
-            dataReady: false,
-            tableData: [],
+            tableData: this.props.data,
             openUserRatingConfirmView: false
         }
     }
@@ -49,22 +48,20 @@ class ProductListing extends Component {
         console.log(this.props.userRole, typeof this.props.userRole);
 
 
-        this.props.getPublishedProductDetails()
-            .then(result => {
-                if (result !== 'undefined' && result.length > 0) {
+        // this.props.data
+        //     .then(result => {
+        //         if (result !== 'undefined' && result.length > 0) {
 
-                    this.setState({
-                        dataReady: true,
-                        tableData: result
-                    });
-                    console.log("Data received for product listing")
-                    console.log(result);
-                }
-            }).catch(err => {
-                console.log(err);
-            });
-
-
+        //             this.setState({
+        //                 dataReady: true,
+        //                 tableData: result
+        //             });
+        //             console.log("Data received for product listing");
+        //             console.log(result);
+        //         }
+        //     }).catch(err => {
+        //         console.log(err);
+        //     });
 
     }
 
@@ -88,51 +85,62 @@ class ProductListing extends Component {
             { name: 'props', displayName: "", props: { ...this.props, toggleUserRatingConfirmView: this.toggleUserRatingConfirmView } },
         ];
 
+        //If Marketplace manager && product sold out
+        // fields[2]={{ name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.pendingActionLink, }
 
-
-        return (
-            <div>
-                <div>
-                    <br />
-                    <br />
-                    <div >
-                        {((this.props.userRole === NumToUserRole['1'].toString()) && !this.state.showPublishPage && !this.state.openUserRatingConfirmView) ?
-                            (<button className='btn btn-primary'
-                                onClick={this.publishNewProductView}>
-                                Publish New Product
-                            </button>) : null}
-                        <br />
-                        <br />
-                    </div>
-                    {
-                        (this.state.showPublishPage) ? (<div><PublishProductForm
-                            closePublishView={this.returnToProductListView}
-                            account={this.props.accounts}
-                            {...this.state} {...this.props} />
-                        </div>) : null //ref={this.publishNewProductFormRef}
-                    }{
-
-                        (this.state.dataReady && !this.state.showPublishPage && !this.state.openUserRatingConfirmView) ?
-                            (<div><FilterableTable
-                                namespace="People"
-                                initialSort="name"
-                                data={this.state.tableData}
-                                fields={fields}
-                                roRecordsMessage="There are no products to display"
-                                noFilteredRecordsMessage="No product match your filters!"
-                            /></div>) : null
-                    }
-                    {
-                        this.state.openUserRatingConfirmView ? (<PostUserRating
-                            postUserRating={this.props.postUserRating}
-                            ratedUserName={this.ratedUserName}
-                            ratedUserAccount={this.ratedUserAccount}
-                            ratedUserReceivedRating={this.ratedUserReceivedRating}
-                            toggleViewHandler={this.toggleUserRatingConfirmView} />) : null
-                    }
+        if (this.state.loading) {
+            return (
+                <div id='loader' className='text-center'>
+                    <p className='text-center'>Loading...</p>
                 </div>
-            </div>
-        )
+            )
+        } else {
+
+
+            return (
+                <div>
+                    <div>
+                        <br />
+                        <br />
+                        <div >
+                            {((this.props.userRole === NumToUserRole['1'].toString()) && !this.state.showPublishPage && !this.state.openUserRatingConfirmView) ?
+                                (<button className='btn btn-primary'
+                                    onClick={this.publishNewProductView}>
+                                    Publish New Product
+                                </button>) : null}
+                            <br />
+                            <br />
+                        </div>
+                        {
+                            (this.state.showPublishPage) ? (<div><PublishProductForm
+                                closePublishView={this.returnToProductListView}
+                                account={this.props.accounts}
+                                {...this.state} {...this.props} />
+                            </div>) : null //ref={this.publishNewProductFormRef}
+                        }{
+
+                            (!this.state.showPublishPage && !this.state.openUserRatingConfirmView) ?
+                                (<div><FilterableTable
+                                    namespace="People"
+                                    initialSort="name"
+                                    data={this.state.tableData}
+                                    fields={fields}
+                                    roRecordsMessage="There are no products to display"
+                                    noFilteredRecordsMessage="No product match your filters!"
+                                /></div>) : null
+                        }
+                        {
+                            this.state.openUserRatingConfirmView ? (<PostUserRating
+                                postUserRating={this.props.postUserRating}
+                                ratedUserName={this.ratedUserName}
+                                ratedUserAccount={this.ratedUserAccount}
+                                ratedUserReceivedRating={this.ratedUserReceivedRating}
+                                toggleViewHandler={this.toggleUserRatingConfirmView} />) : null
+                        }
+                    </div>
+                </div>
+            )
+        }
     }
 }
 export default ProductListing;

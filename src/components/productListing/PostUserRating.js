@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './ProductListing.css';
+import '../../css/ProductListing.css';
 
 class PostUserRating extends Component {
 

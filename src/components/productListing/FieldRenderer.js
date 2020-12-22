@@ -1,6 +1,7 @@
 import React from 'react';
 import { UserRoleToNum } from '../Constants';
 import ReactStars from "react-rating-stars-component";
+//import InvestorPayoutSelector from './InvestorPayoutSelector';
 
 
 //import { NumToUserRole } from '../Constants';
@@ -29,20 +30,55 @@ export default {
         console.log("In renderer", "Role", userRole)
         console.log("Props", fields[fields.length - 1].props);
         const scfsm = scfsmList[productID];
+        const investors = scfsm.state.context.investorsToBePaidOut;
+        console.log('Investors for ', productID, investors);
         var scfsmState = scfsm.state.value;
         var nextActionButtonValue = '';
         var isInputDisabled = true;
         var buttonDisabled = true;
         var submitButtonVariant = 'btn btn-secondary';
         var toolTipPendingActionText = "Pending action for Product Owner";
+        var investorSelectorDisabled = true;
+        var selectedInvestorAccount = '';
+        var payoutAmount = 0;
+        const selectedInvestorAccountLabelID = 'selectedInvestorAccount' + productID;
+        const selectedInvestorNameLabelID = 'selectedInvestorName' + productID;
+        const selectedInvestorDueAmountLabelID = 'selectedInvestorDueAmount' + productID;
+        const submitButtonID = 'submitButton' + productID;
 
+        var investorPayoutOptionSelected = false;
         var formSubmitAction;
+
         switch (scfsmState) {
-            case 'sold':
-                nextActionButtonValue = 'Sold';
-                buttonDisabled = 'true';
+            case 'settled':
+                nextActionButtonValue = 'Settled';
+                buttonDisabled = true;
                 submitButtonVariant = 'btn btn-success';
-                toolTipPendingActionText = 'Product delivered to Customer';
+                toolTipPendingActionText = 'Product supplychain settled';
+                investorSelectorDisabled = true;
+                break;
+            case 'pendingInvestorSettlement':
+                nextActionButtonValue = 'Payout Investors';
+                buttonDisabled = true;
+                toolTipPendingActionText = 'Waiting for Marketplace Manager to settle payouts';
+                if (userRole === 'Marketplace Manager') {
+
+                    investorSelectorDisabled = false;
+                    submitButtonVariant = 'btn btn-primary';
+                    formSubmitAction = function (event) {
+                        event.preventDefault();
+                        let scFSMEvent = {
+                            type: 'PAYOUT_INVESTOR',
+                            payload: {
+                                sender: activeUserAccount,
+                                investorAccount: selectedInvestorAccount,
+                                payoutAmount: payoutAmount,
+                            }
+                        };
+                        console.log('Invoked FSM', scfsm, 'with event', scFSMEvent);
+                        scfsm.send(scFSMEvent);
+                    }
+                }
                 break;
             case 'onSale':
                 nextActionButtonValue = 'Buy';
@@ -146,18 +182,81 @@ export default {
                     buttonDisabled = true;
                     submitButtonVariant = 'btn btn-secondary';
                 }
-
-
                 break;
             default:
                 console.error("Product in unknown fsm stage");
                 break;
         }
 
+        const selectInvestor = (event) => {
+            console.log(event.target);
+            investorPayoutOptionSelected = event.target.value.split('-').length > 1;
+            if (investorPayoutOptionSelected) {
+                document.getElementById(selectedInvestorNameLabelID).value = event.target.value.split('-')[0];
+                selectedInvestorAccount = document.getElementById(selectedInvestorAccountLabelID).value = event.target.value.split('-')[1];
+                payoutAmount = document.getElementById(selectedInvestorDueAmountLabelID).value = event.target.value.split('-')[2];
+                document.getElementById(submitButtonID).disabled = false;
+                console.log('Selected Invester-', document.getElementById(selectedInvestorNameLabelID).value, selectedInvestorAccount);
+            } else {
+                document.getElementById(selectedInvestorNameLabelID).value = '';
+                selectedInvestorAccount = document.getElementById(selectedInvestorAccountLabelID).value = '';
+                payoutAmount = document.getElementById(selectedInvestorDueAmountLabelID).value = '';
+                document.getElementById(submitButtonID).disabled = true;
+            }
+        }
+        const renderInvestorOptions = () => {
+            //const { investors: investors  = this.props;
+            return (
+                investors &&
+                investors.length > 0 &&
+                investors.map((investor, index) => {
+                    return <option value={investor.name + '-' + investor.account + '-' + investor.dueAmount}>{investor.name + '-' + investor.account}</option>;
+                })
+            );
+        }
+
         return (
             <span>
                 <form name={productID} onSubmit={formSubmitAction}>
 
+                    {!investorSelectorDisabled ? (
+                        <div className='form-group mr-sm-2' >
+
+
+                            <div className="form-group">
+
+                                <select id="selectButton" onChange={selectInvestor}>
+                                    <option value=''>Select Investor for Payout</option>
+                                    {renderInvestorOptions()}
+                                </select>
+                            </div>
+
+                            <div className="form-group" >
+                                <input
+                                    id={'selectedInvestorName' + productID}
+                                    type='text'
+                                    className='form-control'
+                                    placeholder='Investor Name'
+                                    readOnly />
+                            </div>
+
+                            <div className="form-group" >
+                                <input
+                                    id={'selectedInvestorAccount' + productID}
+                                    type='text'
+                                    className='form-control'
+                                    placeholder='Investor Account'
+                                    readOnly />
+                            </div>
+
+                            <div className="form-group">
+                                <input
+                                    id={'selectedInvestorDueAmount' + productID}
+                                    type='text'
+                                    className='form-control'
+                                    placeholder='Due Amount(in Wei)'
+                                    readOnly /></div>
+                        </div>) : null}
                     <input
                         disabled={isInputDisabled}
                         hidden={isInputDisabled}
@@ -168,7 +267,7 @@ export default {
                         placeholder='Amount (in Wei)'
                         required />
                     <br />
-                    <button type='submit' title={toolTipPendingActionText} disabled={buttonDisabled} className={submitButtonVariant} size="sm" >{nextActionButtonValue}</button>
+                    <button id={'submitButton' + productID} type='submit' title={toolTipPendingActionText} disabled={buttonDisabled} className={submitButtonVariant} size="sm" >{nextActionButtonValue}</button>
                 </form>
             </span>
         );

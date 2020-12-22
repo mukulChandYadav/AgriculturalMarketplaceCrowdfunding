@@ -8,19 +8,19 @@ import ProductHub from '../artifacts/ProductHub';
 // onReceive() allows us to receive events from the parent while the service is running
 export const transferFund = (ctx, e) => {
 
-    console.log('transferFund', 'context',ctx, 'event',e);
-    console.log('StructStorage',ProductHub,Utility.ProductHubContractAddress, Utility.Web3);
+    console.log('transferFund', 'context', ctx, 'event', e);
+    console.log('StructStorage', ProductHub, Utility.ProductHubContractAddress, Utility.Web3);
 
     //this.setState({ loading: true });
     const productContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
-    console.log('productContract',productContract);
+    console.log('productContract', productContract);
     //const performTransferPromise = {};
     const userRoletype = 3; //Hardcoded to Investor
     const receiverAccount = e.payload.receiverAccount;
     const productID = ctx.universalProductCode;
     const senderAccount = e.payload.sender;
     const contributionAmount = e.payload.contributionAmount;
-    console.log('receiverAccount',receiverAccount);
+    console.log('receiverAccount', receiverAccount);
     const performTransferPromise = productContract.methods.fundProduct(receiverAccount, userRoletype, productID)
         .send({
             from: senderAccount,
@@ -34,18 +34,18 @@ export const transferFund = (ctx, e) => {
             console.log(receipt);
             //this.setState({ loading: false });
         });
-  
+
     return performTransferPromise;
-  };
+};
 
-  export const harvestProduct = (ctx, e) => {
+export const harvestProduct = (ctx, e) => {
 
-    console.log('harvestProduct', 'context',ctx, 'event',e);
-    console.log('StructStorage',ProductHub,Utility.ProductHubContractAddress, Utility.Web3);
+    console.log('harvestProduct', 'context', ctx, 'event', e);
+    console.log('StructStorage', ProductHub, Utility.ProductHubContractAddress, Utility.Web3);
 
     const productContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
-    console.log('productContract',productContract);
-    
+    console.log('productContract', productContract);
+
     //const userRoletype = 1; //Hardcoded to Farmer
     //const receiverAccount = e.payload.receiverAccount;
     const productID = ctx.universalProductCode;
@@ -65,19 +65,19 @@ export const transferFund = (ctx, e) => {
             console.log(receipt);
             //this.setState({ loading: false });
         });
-  
+
     return performTransferPromise;
-  };
+};
 
 
-  export const transferProductOwnershipToMarketplace = (ctx, e) => {
+export const transferProductOwnershipToMarketplace = (ctx, e) => {
 
-    console.log('transferProductOwnershipToMarketplace', 'context',ctx, 'event',e);
-    console.log('StructStorage',ProductHub,Utility.ProductHubContractAddress, Utility.Web3);
+    console.log('transferProductOwnershipToMarketplace', 'context', ctx, 'event', e);
+    console.log('StructStorage', ProductHub, Utility.ProductHubContractAddress, Utility.Web3);
 
     const productContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
-    console.log('productContract',productContract);
-    
+    console.log('productContract', productContract);
+
     //const userRoletype = 1; //Hardcoded to Farmer
     //const receiverAccount = e.payload.receiverAccount;
     const productID = ctx.universalProductCode;
@@ -97,19 +97,19 @@ export const transferFund = (ctx, e) => {
             console.log(receipt);
             //this.setState({ loading: false });
         });
-  
+
     return performTransferPromise;
-  };
+};
 
 
-  export const sellToCustomer = (ctx, e) => {
+export const sellToCustomer = (ctx, e) => {
 
-    console.log('sellToCustomer', 'context',ctx, 'event',e);
-    console.log('StructStorage',ProductHub,Utility.ProductHubContractAddress, Utility.Web3);
+    console.log('sellToCustomer', 'context', ctx, 'event', e);
+    console.log('StructStorage', ProductHub, Utility.ProductHubContractAddress, Utility.Web3);
 
     const productContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
-    console.log('productContract',productContract);
-    
+    console.log('productContract', productContract);
+
     //const userRoletype = 1; //Hardcoded to Farmer
     //const receiverAccount = e.payload.receiverAccount;
     const productID = ctx.universalProductCode;
@@ -129,6 +129,32 @@ export const transferFund = (ctx, e) => {
             console.log(receipt);
             //this.setState({ loading: false });
         });
-  
+
     return performTransferPromise;
-  };
+};
+
+export const payoutInvestor = (ctx, e) => {
+    var upc = ctx.universalProductCode;
+    var investorAccount = e.payload.investorAccount;
+    const senderAccount = e.payload.sender;
+    const payoutAmount = e.payload.payoutAmount;
+    console.log('Payout Investor service call Args', upc, investorAccount, senderAccount);
+    //this.setState({ loading: true });
+    const productHubContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
+    const investorPayoutPromise = productHubContract.methods.sendMarketplacePayoutToInvestor(Number(upc), investorAccount)
+        .send({
+            from: senderAccount,
+            value: Number(payoutAmount)
+        }).on('receipt', async (receipt) => {
+            //this.setState({ loading: false });
+            console.log(receipt);
+        }).on('error', function (error, receipt) {
+            console.log(error);
+            console.log(receipt);
+            //this.setState({ loading: false });
+        });
+
+    return investorPayoutPromise;
+};
+
+

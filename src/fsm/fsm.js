@@ -102,6 +102,36 @@ export const fsm = {
       }
     },
     sold: {
+      on: {
+        '': [{
+          target: 'settled',
+          cond: 'areAllInvestorsPaid',
+        }, {
+          target: 'pendingInvestorSettlement',
+          cond: 'allInvestorsNotPaid',
+        }]
+      }
+    },
+    pendingInvestorSettlement: {
+      on: {
+        PAYOUT_INVESTOR: 'payingInvestor',
+      }
+    },
+    payingInvestor: {
+      invoke: {
+        id: 'payoutInvestor',
+        src: 'payoutInvestor',
+        onDone: [
+          {
+            target: 'sold',
+          }
+        ],
+        onError: {
+          target: 'pendingInvestorSettlement',
+        }
+      },
+    },
+    settled: {
       type: 'final'
     },
     rejected: {

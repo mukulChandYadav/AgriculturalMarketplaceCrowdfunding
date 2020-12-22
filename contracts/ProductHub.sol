@@ -89,17 +89,15 @@ contract ProductHub is Ownable {
         if (amount < msg.value) {
             require(msg.sender.send(msg.value - amount));
         }
-        if (userRoleType == 3) {
-            // 3 - Investor user role index
-            //Investor needs to be paid back when item is put on sale
-            require(
-                supplychainProductStateContract.acceptFundsFromSender(
-                    _universalProductCode,
-                    msg.sender,
-                    amount
-                )
-            );
-        }
+        require(
+            supplychainProductStateContract.acceptFundsFromSender(
+                _universalProductCode,
+                userRoleType,
+                msg.sender,
+                amount
+            )
+        );
+
         if (p.requiredFunding == 0) {
             require(
                 supplychainProductStateContract.updateSupplychainStatus(
@@ -304,7 +302,7 @@ contract ProductHub is Ownable {
     function getPayoutAmountForContributorToAProduct(
         uint256 _upc,
         address payable contributor
-    ) external view returns (uint256) {
+    ) public view returns (uint256) {
         require(_upc > 0);
         require(contributor != address(0));
         return
@@ -318,13 +316,33 @@ contract ProductHub is Ownable {
      * Get list of contributors for given product
      *
      */
-    function getContributorListForAProduct(uint256 _upc)
-        external
+    function getContributorFromListForAProduct(uint256 _upc, uint256 entryNum)
+        public
         view
-        returns (address[] memory)
+        returns (address)
     {
         require(_upc > 0);
-        return supplychainProductStateContract.getListOfPayblesForProduct(_upc);
+        return
+            supplychainProductStateContract.getFromListOfPayblesForProduct(
+                _upc,
+                entryNum
+            );
+    }
+
+    /**
+     * Get total number of investors for a product
+     *
+     */
+    function getNumberOfInvestorsForAProduct(uint256 _universalProductCode)
+        public
+        view
+        returns (uint256)
+    {
+        require(_universalProductCode > 0);
+        return
+            supplychainProductStateContract.getNumberOfPayblesForProduct(
+                _universalProductCode
+            );
     }
     // event Received(address, uint256);
 
