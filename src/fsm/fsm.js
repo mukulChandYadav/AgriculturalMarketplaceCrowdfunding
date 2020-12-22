@@ -30,7 +30,7 @@ export const fsm = {
       on: {
         FUND: {
           target: 'funding',
-          actions: assign({ 'transferringFund': (context, event) => event.payload.contributionAmount })
+          //actions: assign({ 'transferringFund': (context, event) => event.payload.contributionAmount })
         }
       }
     },
@@ -42,7 +42,7 @@ export const fsm = {
           {
             target: 'funded',
             cond: 'isRequiredFundingAchieved',
-            actions: assign({ 'transferringFund': (context, event) => undefined })
+            //actions: assign({ 'transferringFund': (context, event) => undefined })
           },
           {
             target: 'productPublished',
@@ -51,7 +51,7 @@ export const fsm = {
         ],
         onError: {
           target: 'productPublished',
-          actions: assign({ 'transferringFund': (context, event) => undefined })
+          //actions: assign({ 'transferringFund': (context, event) => undefined })
         }
       },
     },

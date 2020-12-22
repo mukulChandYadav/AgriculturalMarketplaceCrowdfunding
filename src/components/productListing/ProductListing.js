@@ -71,8 +71,8 @@ class ProductListing extends Component {
 
         let fields = [
 
-            { name: 'universalProductCode', displayName: "Universal Product Code", inputFilterable: true, exactFilterable: true, sortable: true },
-            { name: 'cropName', displayName: "Crop Name", inputFilterable: true, sortable: true },
+            { name: 'universalProductCode', displayName: "Universal Product Code", inputFilterable: true,  sortable: true },
+            { name: 'cropName', displayName: "Crop Name", inputFilterable: true, sortable: true, exactFilterable: true, },
             { name: 'productFundingPageLink', displayName: "Pending Action", render: FieldRenderer.pendingActionLink, },
             { name: 'userRating', displayName: "Owner Rating", render: FieldRenderer.userRating, },
             { name: 'quantity', displayName: "Quantity", sortable: true, inputFilterable: true, exactFilterable: true },
