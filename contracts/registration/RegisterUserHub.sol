@@ -20,8 +20,7 @@ abstract contract RegisterUserHub is
     Ownable
 {
     //Registered users to role mapping
-    mapping(address => UserRoleType) registeredUsers;
-    mapping(address => string) userNames;
+    mapping(address => User) userStore;
 
     enum UserRoleType {
         DefaultPlaceholder,
@@ -33,9 +32,17 @@ abstract contract RegisterUserHub is
         MarketplaceManager
     }
 
+    struct User {
+        address payable account;
+        string userName;
+        UserRoleType userRoleType;
+        int256 rating;
+        int256 reviewsReceived;
+    }
+
     //Add account to common registry
-    function registerUser(string memory userName, uint256 userRoleType)
-        public
+    function registerUser(string calldata userName, uint256 userRoleType)
+        external
         virtual
         returns (bool);
 
@@ -47,4 +54,13 @@ abstract contract RegisterUserHub is
 
     //Get username assigned to account
     function getUserName() public virtual view returns (string memory);
+
+    //Get user rating assigned to account
+    function getUserRating(address user) public virtual view returns (int256);
+
+    //Update user rating assigned to account
+    function setUserRating(int256 providedRating, address user)
+        public
+        virtual
+        returns (bool);
 }

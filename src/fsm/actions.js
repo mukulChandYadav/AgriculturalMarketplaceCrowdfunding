@@ -2,7 +2,8 @@
 
 // export const reloadItems = send(
 // 	{ type: 'ServiceLoadItems' }, // the event to be sent
-// 	{ to: 'ItemService' }, // the target servcie to receive that event
+//     { to: 'ItemService' }, // the target servcie to receive that event
+//     window.location.reload(false);
 // );
 
 // export const listDataSuccess = assign((ctx, evt) => {

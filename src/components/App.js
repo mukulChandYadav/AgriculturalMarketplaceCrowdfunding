@@ -1,7 +1,7 @@
 
 import SupplychainHub from '../artifacts/SupplychainHub';
-import StructStorage from '../artifacts/StructStorage';
-import StandardRegisterUserHub from '../artifacts/StandardRegisterUserHub';
+import ProductHub from '../artifacts/ProductHub';
+import RegisterUserHubContract from '../artifacts/StandardRegisterUserHub';
 import React, { Component } from 'react';
 import Navbar from './Navbar';
 import Register from './Register';
@@ -29,21 +29,20 @@ class App extends Component {
     super(props);
     this.state = {
       account: '',
-      registerUserHubContract: '',
-      registerUserHubContractAddress: '',
       loading: true,
       productSCMachinesIndexedByID: [{}], // With place holder as upc starts at 1
       productSCServicesIndexedByID: [{}],
-      zeroAddr: '0x0000000000000000000000000000000000000000'
+      productDetails: []
     }
     this.getPublishedProductDetails = this.getPublishedProductDetails.bind(this);
-    this.registerUser = this.registerUser.bind(this);
-    this.publishProduct = this.publishProduct.bind(this);
+    // this.registerUser = this.registerUser.bind(this);
+    // this.publishProduct = this.publishProduct.bind(this);
     //this.getProductDetails = this.getProductDetails.bind(this);
-    this.fundProduct = this.fundProduct.bind(this);
+    this.postUserRating = this.postUserRating.bind(this);
     this.getUserAccountDetails = this.getUserAccountDetails.bind(this);
     this.loadContract = this.loadContract.bind(this);
-
+    this.getInvestorsToBePaidOutInfo = this.getInvestorsToBePaidOutInfo.bind(this);
+    this.attachToWalletProvider = this.attachToWalletProvider.bind(this);
 
     this.dumpState = this.dumpState.bind(this);
     this.useMachineExHelper = this.useMachineExHelper.bind(this);
@@ -54,6 +53,19 @@ class App extends Component {
   async componentDidMount() {
 
     // this returns the provider, or null if it wasn't detected
+    let walletDidAttach = await this.attachToWalletProvider();
+    if (walletDidAttach) {
+
+      await this.loadBlockchainData();
+      this.setState({ loading: true });
+      this.setState({ productDetails: await this.getPublishedProductDetails() });
+      await this.getUserAccountDetails();
+      this.setState({ loading: false });
+    }
+  }
+
+
+  async attachToWalletProvider() {
     const provider = await detectEthereumProvider();
 
     if (provider) {
@@ -66,17 +78,15 @@ class App extends Component {
         toaster.notify('Do you have multiple wallets installed?', {
           position: 'top-right',
         });
+        return false;
       } else {
 
         // Access the decentralized web!
-
         /**********************************************************/
         /* Handle chain (network) and chainChanged (per EIP-1193) */
         /**********************************************************/
-
         // Normally, we would recommend the 'eth_chainId' RPC method, but it currently
         // returns incorrectly formatted chain ID values.
-
         window.ethereum.on('chainChanged', function (_chainId) {
           // We recommend reloading the page, unless you must do otherwise
           window.location.reload();
@@ -86,14 +96,12 @@ class App extends Component {
         /***********************************************************/
         /* Handle user accounts and accountsChanged (per EIP-1193) */
         /***********************************************************/
-
         // Note that this event is emitted on page load.
         // If the array of accounts is non-empty, you're already
         // connected.
         window.ethereum.on('accountsChanged', function () { window.location.reload(); });
 
-
-        await this.loadBlockchainData();
+        return true;
       }
 
     } else {
@@ -102,9 +110,9 @@ class App extends Component {
       });
       console.log('Please install MetaMask');
       window.location.assign("https://metamask.io/");
+      return false;
     }
   }
-
 
   async createMachine(id, context) {
 
@@ -133,21 +141,17 @@ class App extends Component {
 
   async loadWeb3() {
 
-
-    if (this.state.web3 === undefined) {
-      const web3 = new Web3(window.ethereum);
-      this.setState({ web3: web3 });
+    if (Utility.Web3 === undefined) {
+      Utility.Web3 = new Web3(window.ethereum);
       console.log("Web3 loaded");
-      return web3;
-    } else {
-      return this.state.web3;
-    }
 
+    }
+    return Utility.Web3;
   }
 
   async loadBlockchainData() {
-    const web3 = Utility.Web3 = await this.loadWeb3();
-    const accounts = await web3.eth.getAccounts();
+    await this.loadWeb3();
+    const accounts = await Utility.Web3.eth.getAccounts();
     if (typeof accounts === undefined || accounts.length === 0) {
       console.log('No metamask account loaded.');
       toaster.notify('No metamask account loaded.', {
@@ -155,7 +159,7 @@ class App extends Component {
       });
     } else {
       this.setState({ account: accounts[0] });
-      const networkId = await web3.eth.net.getId();
+      const networkId = await Utility.Web3.eth.net.getId();
 
       await this.configureContracts(networkId);
     }
@@ -165,16 +169,13 @@ class App extends Component {
   async configureContracts(networkId) {
 
     // Get registerUserHub contract details
-    const registerUserHubNetworkData = StandardRegisterUserHub.networks[networkId];
+    const registerUserHubNetworkData = RegisterUserHubContract.networks[networkId];
     if (registerUserHubNetworkData) {
-      this.setState({
-        'registerUserHubContractAddress': registerUserHubNetworkData.address
-      });
       Utility.RegisterUserHubContractAddress = registerUserHubNetworkData.address;
-      console.log("RegisterUserHub contract loaded:" + this.state.registerUserHubContractAddress);
-      await this.loadContract(StandardRegisterUserHub, this.state.registerUserHubContractAddress, 'registerUserHubContract');
-      Utility.RegisterUserHubContract = this.state.registerUserHubContract;
-      await this.getUserAccountDetails();
+      //console.log("RegisterUserHub contract loaded:" + Utility.RegisterUserHubContractAddress);
+      Utility.RegisterUserHubContract = await this.loadContract(RegisterUserHubContract, Utility.RegisterUserHubContractAddress);
+
+
     } else {
       toaster.notify('RegisterUserHub contract not deployed to detected network', {
         position: 'top-right',
@@ -184,32 +185,25 @@ class App extends Component {
 
 
     // Get StandardProduct contract details
-    const structStorageNetworkData = StructStorage.networks[networkId];
-    if (structStorageNetworkData) {
-      this.setState({
-        'structStorageContractAddress': structStorageNetworkData.address
-      });
-      Utility.StructStorageContractAddress = structStorageNetworkData.address;
-      console.log("StructStorage contract loaded:" + this.state.structStorageContractAddress);
-      await this.loadContract(StructStorage, this.state.structStorageContractAddress, 'structStorageContract');
-      Utility.StructStorageContract = this.state.structStorageContract;
+    const productHubNetworkData = ProductHub.networks[networkId];
+    if (productHubNetworkData) {
+      Utility.ProductHubContractAddress = productHubNetworkData.address;
+      //console.log("ProductHub contract loaded:" + Utility.ProductHubContractAddress);
+      Utility.ProductHubContract = await this.loadContract(ProductHub, Utility.ProductHubContractAddress);
     } else {
-      toaster.notify('StructStorage contract not deployed to detected network', {
+      toaster.notify('ProductHub contract not deployed to detected network', {
         position: 'top-right',
       });
-      console.log('StructStorage contract not deployed to detected network');
+      console.log('ProductHub contract not deployed to detected network');
     }
 
     // Get SupplychainHub contract details
     const supplychainHubNetworkData = SupplychainHub.networks[networkId];
     if (supplychainHubNetworkData) {
-      this.setState({
-        'supplychainHubContractAddress': supplychainHubNetworkData.address
-      });
       Utility.SupplychainHubContractAddress = supplychainHubNetworkData.address;
-      console.log("SupplychainHub contract loaded:" + this.state.supplychainHubContractAddress);
-      await this.loadContract(SupplychainHub, this.state.supplychainHubContractAddress, 'supplychainHubContract');
-      Utility.SupplychainHubContract = this.state.supplychainHubContract;
+      //console.log("SupplychainHub contract loaded:" + Utility.SupplychainHubContractAddress);
+      Utility.SupplychainHubContract = await this.loadContract(SupplychainHub, Utility.SupplychainHubContractAddress);
+
     } else {
       toaster.notify('SupplychainHub contract not deployed to detected network', {
         position: 'top-right',
@@ -218,101 +212,56 @@ class App extends Component {
     }
   }
 
-  async loadContract(contractBytecode, contractAddress, stateVar) {
-    const web3 = await this.loadWeb3();
-    const contract = new web3.eth.Contract(contractBytecode.abi, contractAddress);
-    this.state[stateVar] = contract;
-    console.log("App state");
-    console.log(this.state);
+  async loadContract(contractBytecode, contractAddress) {
+    await this.loadWeb3();
+    const contract = new Utility.Web3.eth.Contract(contractBytecode.abi, contractAddress);
+    return contract;
+    //console.log("App state");
+    //console.log(this.state);
   }
 
   async getUserAccountDetails() {
 
-    const isUserRegistered = await this.state.registerUserHubContract.methods.isRegistered().call({ from: this.state.account });
-    if (isUserRegistered) {
-      const userRole = await this.state.registerUserHubContract.methods.getUserRole().call({ from: this.state.account });
-      const userName = await this.state.registerUserHubContract.methods.getUserName().call({ from: this.state.account });
-      console.log("Get username of call:" + await this.state.registerUserHubContract.methods.getUserNameOf(this.state.account).call({ from: this.state.account }));
+    if (Utility.RegisterUserHubContract !== undefined && Utility.RegisterUserHubContract !== '') {
+      const isUserRegistered = await Utility.RegisterUserHubContract.methods.isRegistered().call({ from: this.state.account });
+      if (isUserRegistered) {
+        const userRole = await Utility.RegisterUserHubContract.methods.getUserRole().call({ from: this.state.account });
+        const userName = await Utility.RegisterUserHubContract.methods.getUserName().call({ from: this.state.account });
+        //console.log("Get username of call:" + await Utility.RegisterUserHubContract.methods.getUserNameOf(this.state.account).call({ from: this.state.account }));
+        this.setState({
+          'userRole': NumToUserRole[userRole],
+          'userName': userName
+        });
+        //console.log("userRole:" + this.state.userRole);
+      }
+
       this.setState({
-        'userRole': NumToUserRole[userRole],
-        'userName': userName
+        'isUserRegistered': isUserRegistered
       });
-      console.log("userRole:" + this.state.userRole);
+      //console.log("Is User Registered:" + isUserRegistered + " " + this.state.account);
     }
-
-    this.setState({
-      'isUserRegistered': isUserRegistered
-    });
-    console.log("Is User Registered:" + isUserRegistered + " " + this.state.account);
-  }
-
-
-  async publishProduct(args) {
-    this.setState({ loading: true });
-    const web3 = this.state.web3;
-    console.log(args, web3.utils.asciiToHex(args.cropName),
-      parseInt(args.quantity),
-      parseInt(args.expectedPrice),
-      parseInt(args.requiredFunding)
-    );
-    this.state.structStorageContract.methods.produce(
-      web3.utils.asciiToHex(args.cropName),
-      web3.utils.numberToHex(args.quantity),
-      web3.utils.numberToHex(args.expectedPrice),
-      web3.utils.numberToHex(args.requiredFunding)
-      //args.sku,
-      //args.account,
-      //args.productPrice,
-      //args.originFarmName,
-      //args.productNotes,
-      //args.fundingCap,
-      //args.deadline
-    ).send({
-      from: this.state.account,
-      gas: 2000000
-    }).on('receipt', async (receipt) => {
-      console.log(receipt);
-      this.setState({ loading: false });
-    }).on('error', function (error, receipt) {
-      console.log(error);
-      console.log(receipt);
-      this.setState({ loading: false });
-    });
-  }
-
-  async registerUser(userName, userRoleType) {
-    this.setState({ loading: true });
-    this.state.registerUserHubContract.methods.registerUser(userName, userRoleType)
-      .send({
-        from: this.state.account
-      }).on('receipt', async (receipt) => {
-        //await this.loadSupplychainHub()
-        this.setState({ loading: false });
-        console.log(receipt);
-      }).on('error', function (error, receipt) {
-        console.log(error);
-        console.log(receipt);
-        this.setState({ loading: false });
-      });
   }
 
   async getPublishedProductDetails() {
-    const web3 = this.state.web3;
+    const web3 = Utility.Web3;
     var data = [];
-    if (this.state.structStorageContract !== undefined && this.state.structStorageContract !== '') {
-      const productIDCounterInclusive = await this.state.structStorageContract.methods.upc().call({
+    if (Utility.ProductHubContract !== undefined && Utility.ProductHubContract !== '') {
+      const productIDCounterInclusive = await Utility.ProductHubContract.methods.upc().call({
         from: this.state.account
       });
       console.log("productIDCounterInclusive", productIDCounterInclusive);
 
       for (var productID = 1; productID < productIDCounterInclusive; ++productID) {
-        const productDetail = await this.state.structStorageContract.methods
+        const productDetail = await Utility.ProductHubContract.methods
           .getproduce(productID)
           .call({ from: this.state.account });
-        const accountUserName = await this.state.registerUserHubContract.methods
+        const accountUserName = await Utility.RegisterUserHubContract.methods
           .getUserNameOf(productDetail[6])
           .call({ from: this.state.account });
-        const productSupplychainStatusOrdinal = await this.state.supplychainHubContract.methods
+        const accountUserRating = await Utility.RegisterUserHubContract.methods
+          .getUserRating(productDetail[6])
+          .call({ from: this.state.account });
+        const productSupplychainStatusOrdinal = await Utility.SupplychainHubContract.methods
           .getSupplychainStatus(productID)
           .call({ from: this.state.account });
         let productInfo = {
@@ -324,8 +273,10 @@ class App extends Component {
           availableFunding: productDetail[5],
           ownerAccount: productDetail[6],
           ownerName: accountUserName,
+          userRating: accountUserRating,
           supplyChainStage: OrdinalToSupplyChainStatus[productSupplychainStatusOrdinal]
         };
+        productInfo.investorsToBePaidOut = await this.getInvestorsToBePaidOutInfo(productID);
 
         //productDetail[productDetail.length] = accountUserName;
         //Spawn FSM to track this product supplychain state
@@ -338,7 +289,7 @@ class App extends Component {
       }
       console.log("Product Details", data);
 
-      const balance = await this.state.structStorageContract.methods
+      const balance = await Utility.ProductHubContract.methods
         .getBalance(this.state.account)
         .call({ from: this.state.account });
       this.setState({ userBalance: balance });
@@ -346,27 +297,24 @@ class App extends Component {
 
     } else {
 
-      toaster.notify('structStorageContract not loaded', {
+      toaster.notify('productHubContract not loaded', {
         position: 'top-right',
       });
-      console.error("structStorageContract not loaded");
+      console.error("productHubContract not loaded");
     }
 
     return data;
   }
 
 
-  async fundProduct(receiverAccount, contributionAmount, userRoletype, productID) {
+  async postUserRating(userRating, userAccount) {
     this.setState({ loading: true });
-    const productContract = new this.state.web3.eth.Contract(StructStorage.abi, this.state.structStorageContractAddress);
-
-    userRoletype = 3; //Hardcoded to Investor
-    productContract.methods.fundProduct(receiverAccount, userRoletype, productID)
+    const registerUserHubContract = new this.state.web3.eth.Contract(ProductHub.abi, this.state.productHubContractAddress);
+    //console.log("Post user rating", Number(userRating), userAccount);
+    registerUserHubContract.methods.setUserRating(Number(userRating), userAccount)
       .send({
-        from: this.state.account,
-        value: Number(contributionAmount)
+        from: this.state.account
       }).on('receipt', async (receipt) => {
-        //await this.loadSupplychainHub()
         this.setState({ loading: false });
         console.log(receipt);
       }).on('error', function (error, receipt) {
@@ -375,6 +323,38 @@ class App extends Component {
         this.setState({ loading: false });
       });
 
+  }
+
+
+
+  async getInvestorsToBePaidOutInfo(upc) {
+    this.setState({ loading: true });
+
+    const productHubContract = new Utility.Web3.eth.Contract(ProductHub.abi, Utility.ProductHubContractAddress);
+
+    let numInvestors = await productHubContract.methods.getNumberOfInvestorsForAProduct(Number(upc)).call({
+      from: this.state.account
+    });
+    //console.log('numInvestors',numInvestors);
+
+    let data = [];
+    for (var i = 0; i < numInvestors; ++i) {
+      let productContributor = await productHubContract.methods.getContributorFromListForAProduct(Number(upc), i).call({
+        from: this.state.account
+      });
+
+      var dueAmount = await productHubContract.methods
+        .getPayoutAmountForContributorToAProduct(upc, productContributor)
+        .call({ from: this.state.account });
+      var username = await Utility.RegisterUserHubContract.methods
+        .getUserNameOf(productContributor)
+        .call({ from: this.state.account });
+      if (dueAmount > 0) {
+        data.push({ name: username, account: productContributor, dueAmount: dueAmount });
+      }
+
+    }
+    return data;
   }
 
 
@@ -456,8 +436,11 @@ class App extends Component {
     for (var key in item) {
       console.group(key)
       this.dumpState(item[key], depth + 1)
-      console.groupEnd()
+      console.groupEnd();
     }
+  }
+
+  async componentWillUnmount() {
   }
 
   renderContent() {
@@ -471,16 +454,15 @@ class App extends Component {
       if (this.state.isUserRegistered) {
 
         return (
-          <ProductListing
-            fundProduct={this.fundProduct} publishProduct={this.publishProduct} getPublishedProductDetails={this.getPublishedProductDetails} account={this.state.account} userRole={this.state.userRole} {...this.state}
+          <ProductListing postUserRating={this.postUserRating} data={this.state.productDetails} account={this.state.account} userRole={this.state.userRole} {...this.state}
           />
         )
       } else {
         return (
-          (this.state.registerUserHubContract !== undefined && this.state.registerUserHubContract !== '') ?
-            (< Register
-              registerUser={this.registerUser} account={this.state.account}
-            />) : null
+
+          (< Register
+            account={this.state.account}
+          />)
         )
       }
     }

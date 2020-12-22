@@ -14,7 +14,7 @@ export const requiredFundingNotAchieved = (ctx) => {
 
 export const isInitProductPublishedState = (context) => {
     let result = Number(SupplyChainStatusToOrdinal[context.supplyChainStage]) === 1;
-    console.log('isProductPublishedState', result ,'context.supplyChainStage', context.supplyChainStage, 'Number(SupplyChainStatusToOrdinal[context.supplyChainStage])', Number(SupplyChainStatusToOrdinal[context.supplyChainStage]));
+    console.log('isProductPublishedState', result, 'context.supplyChainStage', context.supplyChainStage, 'Number(SupplyChainStatusToOrdinal[context.supplyChainStage])', Number(SupplyChainStatusToOrdinal[context.supplyChainStage]));
     return result;
 };
 
@@ -40,4 +40,15 @@ export const isInitProductSoldState = (context) => {
     let result = Number(SupplyChainStatusToOrdinal[context.supplyChainStage]) === 5;
     console.log('isInitProductSoldState', result, 'context.supplyChainStage', context.supplyChainStage, 'Number(SupplyChainStatusToOrdinal[context.supplyChainStage])', Number(SupplyChainStatusToOrdinal[context.supplyChainStage]));
     return result;
+};
+
+
+export const areAllInvestorsPaid = (context) => {
+    console.log('Investors Not Paid', context.investorsToBePaidOut);
+    return context.investorsToBePaidOut.length === 0;
+};
+
+export const allInvestorsNotPaid = (context) => {
+    console.log('Investors Not Paid', context.investorsToBePaidOut);
+    return context.investorsToBePaidOut.length !== 0;
 };

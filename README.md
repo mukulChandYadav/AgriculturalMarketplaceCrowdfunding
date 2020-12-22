@@ -41,7 +41,7 @@ This diagram shows the different Smart Contracts and the relation between them
 
 This visualization shows state machine that controls product stages and user interaction navigation in deterministic fashion.
 
-![JS Finite state machine Viz](assets/images/XstateViz.png)
+![JS Finite state machine Viz](assets/images/XstateViz.jpg)
 
 ## Getting Started
 
@@ -95,7 +95,7 @@ ganache-cli -m <mnemonic> -p 8546
 truffle test --network test
 ```
 
-All 11 tests should pass.
+All 15 tests should pass.
 
 ![truffle test](assets/images/TruffleTest.png)
 
@@ -121,17 +121,17 @@ npm run start (Dev)
 ## Acknowledgments
 
 * Dr. Richard Newman, UF CISE Department
-* Solidity
-* Ganache-cli
-* Truffle
+
 
 ## Credits & References
  
 * [Solidity](https://docs.soliditylang.org/en/v0.4.24/)
+* [Truffle Suite](https://trufflesuite.com/) - The most popular blockchain development suite
 * [web3.js - Ethereum JavaScript API](https://web3js.readthedocs.io/en/v1.2.11/)
+* [ganache-cli](https://www.npmjs.com/package/ganache-cli) - Fast Ethereum RPC client for testing and development
 
 * [AgroChain](https://github.com/Kerala-Blockchain-Academy/AgroChain) - Agricultural Supply Chain Dapp With Micro-Finance
-* [DApp for Coffe Suply Chain](https://github.com/axelgalicia/blockchain-supply-chain)
+* [DApp for Coffee Supply Chain](https://github.com/axelgalicia/blockchain-supply-chain)
 * [Supply chain DApp](https://github.com/dappuniversity/supply_chain) - Dapp University supplychain POC
 * [XState](https://github.com/davidkpiano/xstate) - JavaScript State machines and statecharts for the modern web
 * [xstate-examples](https://github.com/coodoo/xstate-examples) - A series of examples showing how to model application state with statechart using xstate

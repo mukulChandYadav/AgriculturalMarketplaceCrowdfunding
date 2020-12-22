@@ -1,8 +1,30 @@
 import React, { Component } from 'react';
 import { UserRoleToNum } from './Constants';
-
+import Utility from '../common/Utility';
 
 class Register extends Component {
+
+    constructor(props) {
+        super(props);
+        this.registerUser = this.registerUser.bind(this);
+    }
+
+
+    async registerUser(userName, userRoleType) {
+        this.setState({ loading: true });
+        Utility.RegisterUserHubContract.methods.registerUser(userName, userRoleType)
+            .send({
+                from: this.props.account
+            }).on('receipt', async (receipt) => {
+                //await this.loadSupplychainHub()
+                this.setState({ loading: false });
+                console.log(receipt);
+            }).on('error', function (error, receipt) {
+                console.log(error);
+                console.log(receipt);
+                this.setState({ loading: false });
+            });
+    }
 
     render() {
         return (
@@ -51,8 +73,8 @@ class Register extends Component {
                     </select>
 
                     <br />
-            
-                        <input type="submit" value="Register" className='btn btn-primary' />
+
+                    <input type="submit" value="Register" className='btn btn-primary' />
 
                 </form>
             </div>

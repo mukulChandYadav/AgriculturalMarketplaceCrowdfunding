@@ -8,7 +8,7 @@ import "./SupplychainHub.sol";
 import "./registration/StandardRegisterUserHub.sol";
 
 // Controller contract for product interaction & workflow
-contract StructStorage is Ownable {
+contract ProductHub is Ownable {
     SupplychainHub supplychainProductStateContract;
     StandardRegisterUserHub standardRegisterUserHubContract;
 
@@ -30,9 +30,13 @@ contract StructStorage is Ownable {
     ) public Ownable() {
         supplychainProductStateContract = _supplychainProductStateContract;
         standardRegisterUserHubContract = _standardRegisterUserHubContract;
-        _standardRegisterUserHubContract.registerUser(
-            "Crowdfunded Agriculture Marketplace Manager",
-            6 //StandardRegisterUserHub.UserRoleType.MarketplaceManager
+        require(
+            _standardRegisterUserHubContract.registerUserInternal(
+                "Crowdfunded Agriculture Marketplace Manager",
+                6, //StandardRegisterUserHub.UserRoleType.MarketplaceManager
+                msg.sender // Sent as argument as it gets overridden by this contract address in upper call stack
+            ),
+            "Failed to register deploying account in Marketplace manager role"
         );
     }
 
@@ -85,17 +89,15 @@ contract StructStorage is Ownable {
         if (amount < msg.value) {
             require(msg.sender.send(msg.value - amount));
         }
-        if (userRoleType == 3) {
-            // 3 - Investor user role index
-            //Investor needs to be paid back when item is put on sale
-            require(
-                supplychainProductStateContract.acceptFundsFromSender(
-                    _universalProductCode,
-                    msg.sender,
-                    amount
-                )
-            );
-        }
+        require(
+            supplychainProductStateContract.acceptFundsFromSender(
+                _universalProductCode,
+                userRoleType,
+                msg.sender,
+                amount
+            )
+        );
+
         if (p.requiredFunding == 0) {
             require(
                 supplychainProductStateContract.updateSupplychainStatus(
@@ -246,7 +248,7 @@ contract StructStorage is Ownable {
         uint256 requiredFunding
     ) public returns (bool) {
         uint256 currentUPC = supplychainProductStateContract.upc();
-        StructStorage.product memory fnew = product(
+        ProductHub.product memory fnew = product(
             currentUPC,
             cropName,
             quantity,
@@ -300,7 +302,7 @@ contract StructStorage is Ownable {
     function getPayoutAmountForContributorToAProduct(
         uint256 _upc,
         address payable contributor
-    ) external view returns (uint256) {
+    ) public view returns (uint256) {
         require(_upc > 0);
         require(contributor != address(0));
         return
@@ -314,13 +316,33 @@ contract StructStorage is Ownable {
      * Get list of contributors for given product
      *
      */
-    function getContributorListForAProduct(uint256 _upc)
-        external
+    function getContributorFromListForAProduct(uint256 _upc, uint256 entryNum)
+        public
         view
-        returns (address[] memory)
+        returns (address)
     {
         require(_upc > 0);
-        return supplychainProductStateContract.getListOfPayblesForProduct(_upc);
+        return
+            supplychainProductStateContract.getFromListOfPayblesForProduct(
+                _upc,
+                entryNum
+            );
+    }
+
+    /**
+     * Get total number of investors for a product
+     *
+     */
+    function getNumberOfInvestorsForAProduct(uint256 _universalProductCode)
+        public
+        view
+        returns (uint256)
+    {
+        require(_universalProductCode > 0);
+        return
+            supplychainProductStateContract.getNumberOfPayblesForProduct(
+                _universalProductCode
+            );
     }
     // event Received(address, uint256);
 

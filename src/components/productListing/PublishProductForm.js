@@ -1,22 +1,62 @@
 import React, { Component } from 'react';
-
+import '../../css/ProductListing.css';
+import '../../common/Utility';
+import Utility from '../../common/Utility';
 class PublishProductForm extends Component {
 
   constructor(props) {
-    super(props)
-    this.state = {
-      'visible': true
-    };
+    super(props);
+    this.state = { 'loading': false };
+    this.publishProduct = this.publishProduct.bind(this);
+  }
+
+  async publishProduct(args) {
+    this.setState({ loading: true });
+    const web3 = Utility.Web3;
+    console.log(args, web3.utils.asciiToHex(args.cropName),
+      parseInt(args.quantity),
+      parseInt(args.expectedPrice),
+      parseInt(args.requiredFunding)
+    );
+    Utility.ProductHubContract.methods.produce(
+      web3.utils.asciiToHex(args.cropName),
+      web3.utils.numberToHex(args.quantity),
+      web3.utils.numberToHex(args.expectedPrice),
+      web3.utils.numberToHex(args.requiredFunding)
+      //args.sku,
+      //args.account,
+      //args.productPrice,
+      //args.originFarmName,
+      //args.productNotes,
+      //args.fundingCap,
+      //args.deadline
+    ).send({
+      from: this.props.account,
+      gas: 2000000
+    }).on('receipt', async (receipt) => {
+      console.log(receipt);
+      this.props.closePublishView();
+      this.setState({ loading: false });
+    }).on('error', function (error, receipt) {
+      console.log(error);
+      console.log(receipt);
+      this.setState({ loading: false });
+    });
   }
 
   render() {
-    return (
-      this.state.visible ? (<div id='content'>
-        <h1>Publish Product</h1>
-        <p>Published product will be tracked for crowd funding</p>
+
+    if (this.state.loading) {
+      return (
+        <div id='loader' className='text-center'>
+          <p className='text-center'>Loading...</p>
+        </div>
+      )
+    } else {
+      return (<div id='content' className='centered'>
         <form onSubmit={(event) => {
           event.preventDefault()
-          this.props.publishProduct({
+          this.publishProduct({
             cropName: this.cropName.value,
             quantity: this.quantity.value,
             expectedPrice: this.expectedPrice.value,
@@ -31,7 +71,10 @@ class PublishProductForm extends Component {
             // deadline: parseInt(this.deadline.value) * 24 * 3600
           })
         }}>
-          <div className='form-group mr-sm-2'>
+
+          <h1 >Publish Product</h1>
+          <p>Published product will be tracked for crowd funding</p>
+          <div>
 
             <input
               id='cropName'
@@ -114,10 +157,13 @@ class PublishProductForm extends Component {
               placeholder='Product Notes'
             /> */}
           </div>
-          <button type='submit' className='btn btn-primary'>Publish Product</button>&nbsp;&nbsp;<button onClick={(event) => { this.setState({ 'visible': false }) }} className='btn btn-secondary'>Cancel</button>
+          <br />
+          <br />
+          <button type='submit' className='btn btn-primary'>Publish Product</button>&nbsp;&nbsp;<button onClick={(event) => { this.props.closePublishView() }} className='btn btn-danger'>Cancel</button>
         </form>
-      </div>) : null
-    );
+      </div>
+      );
+    }
   }
 }
 
