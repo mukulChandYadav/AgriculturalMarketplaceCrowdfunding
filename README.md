@@ -39,9 +39,9 @@ This diagram shows the different Smart Contracts and the relation between them
 
 ### DApp State Machine
 
-This ![visualization](https://xstate.js.org/viz/?gist=7269cc7cf93f614c06aaab4dcb77c2a1) shows state machine that controls product stages and user interaction navigation in deterministic fashion.
+This [visualization](https://xstate.js.org/viz/?gist=7269cc7cf93f614c06aaab4dcb77c2a1) shows state machine that controls product stages and user interaction navigation in deterministic fashion.
 
-![JS Finite state machine Viz](assets/images/XstateViz.jpg)
+![JS Finite state machine Viz](assets/images/XstateViz.png)
 
 ## Getting Started
 
@@ -105,6 +105,31 @@ In a separate terminal window, launch the DApp:
 npm run build (Prod/Build)
 npm run start (Dev)
 ```
+## Application Workflow
+
+### Register User
+![](assets/GIFs/RegisterUser.gif)
+
+### Publish Product Campaign
+![](assets/GIFs/PublishProductCampaign.gif)
+
+### Fund Product
+![](assets/GIFs/FundProduct.gif)
+
+### Harvest Product
+![](assets/GIFs/HarvestProduct.gif)
+
+### Transfer Harvested Product To Marketplace
+![](assets/GIFs/TransferToMarketplace.gif)
+
+### Buy Product From Marketplace
+![](assets/GIFs/SellToCustomer.gif)
+
+### Payout Product Campaign Investors
+![](assets/GIFs/PayoutToInvestors.gif)
+
+### Rate Marketplace users
+![](assets/GIFs/RateUser.gif)
 
 ## Built With
 
