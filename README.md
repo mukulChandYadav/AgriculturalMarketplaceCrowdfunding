@@ -39,7 +39,7 @@ This diagram shows the different Smart Contracts and the relation between them
 
 ### DApp State Machine
 
-This visualization shows state machine that controls product stages and user interaction navigation in deterministic fashion.
+This ![visualization](https://xstate.js.org/viz/?gist=7269cc7cf93f614c06aaab4dcb77c2a1) shows state machine that controls product stages and user interaction navigation in deterministic fashion.
 
 ![JS Finite state machine Viz](assets/images/XstateViz.jpg)
 
