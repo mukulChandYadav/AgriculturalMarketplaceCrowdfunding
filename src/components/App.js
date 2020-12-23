@@ -309,9 +309,8 @@ class App extends Component {
 
   async postUserRating(userRating, userAccount) {
     this.setState({ loading: true });
-    const registerUserHubContract = new this.state.web3.eth.Contract(ProductHub.abi, this.state.productHubContractAddress);
     //console.log("Post user rating", Number(userRating), userAccount);
-    registerUserHubContract.methods.setUserRating(Number(userRating), userAccount)
+    Utility.RegisterUserHubContract.methods.setUserRating(Number(userRating), userAccount)
       .send({
         from: this.state.account
       }).on('receipt', async (receipt) => {

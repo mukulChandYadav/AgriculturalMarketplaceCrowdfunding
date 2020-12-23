@@ -19,10 +19,13 @@ class Register extends Component {
                 //await this.loadSupplychainHub()
                 this.setState({ loading: false });
                 console.log(receipt);
+                // TODO: Fix
+                window.location.reload();
             }).on('error', function (error, receipt) {
                 console.log(error);
                 console.log(receipt);
-                this.setState({ loading: false });
+                window.location.reload();
+                //this.setState({ loading: false });
             });
     }
 
@@ -35,7 +38,7 @@ class Register extends Component {
             }}>
                 <form onSubmit={(event) => {
                     event.preventDefault()
-                    this.props.registerUser(this.userName.value, this.userRole.value)
+                    this.registerUser(this.userName.value, this.userRole.value)
                 }}>
                     <br />
                     <br />
