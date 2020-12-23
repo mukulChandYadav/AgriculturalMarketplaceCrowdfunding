@@ -108,27 +108,51 @@ npm run start (Dev)
 ## Application Workflow
 
 ### Register User
+
+Users can register to the portal using their Metamask wallet account, in designated role, to perform related tasks on the portal.
+
 ![](assets/GIFs/RegisterUser.gif)
 
 ### Publish Product Campaign
+
+Farmer, as a primary user of the portal, registers and then publishes proposed product campaign to retrieve required amount through crowdfunding as well as enables his product's visibility to marketplace users.  
+
 ![](assets/GIFs/PublishProductCampaign.gif)
 
 ### Fund Product
+
+Investors & Donors can fund published product campaigns on Marketplace. Investors intend to derive profit, whereas Users with Donor role don't expect any returns from final product sales.
+
 ![](assets/GIFs/FundProduct.gif)
 
 ### Harvest Product
+
+The Product Publisher, i.e. Farmer, harvests funded product once ready, earmarking Marketplace manager for further processing. Farmer, hands over all his investor liabilities to Marketplace manager at this stage of supplychain action.
+
 ![](assets/GIFs/HarvestProduct.gif)
 
 ### Transfer Harvested Product To Marketplace
+
+The Marketpalce Manager then assumes the ownership of harvested product and then pays expected price to previous owner, i.e. Farmer.
+
 ![](assets/GIFs/TransferToMarketplace.gif)
 
 ### Buy Product From Marketplace
+
+At this juncture of product supplychain, Customers(Spot/Forward), buys product from marketplace at listed price.
+
 ![](assets/GIFs/SellToCustomer.gif)
 
 ### Payout Product Campaign Investors
+
+Upon product being sold to customers, Marketplace manager, decides to payout any investors, if applicable.
+
 ![](assets/GIFs/PayoutToInvestors.gif)
 
 ### Rate Marketplace users
+
+Marketplace users, can decide to rate users based upon status & quality of interaction and commitment of current owner of product towards products maturity.
+
 ![](assets/GIFs/RateUser.gif)
 
 ## Built With
